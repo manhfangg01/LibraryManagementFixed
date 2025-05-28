@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Cập nhật thể loại</title>
+  </head>
+  <body>
+    <h1>✏️ Cập nhật thể loại</h1>
+
+    <!-- Thông báo lỗi -->
+    <div th:if="${ObjectExisted}">
+      <p th:text="${ObjectExisted}" style="color: red"></p>
+    </div>
+
+    <form th:action="@{/categories/edit}" th:object="${category}" method="post">
+      <input type="hidden" th:field="*{id}" />
+      <!-- Bắt buộc phải có dòng này để khi gửi lên /edit có thể category mới có trường id-->
+
+      <label for="name">Tên thể loại:</label>
+      <input type="text" id="name" th:field="*{name}" required />
+      <br />
+
+      <label for="description">Mô tả:</label>
+      <textarea id="description" th:field="*{description}" rows="4" cols="50"></textarea>
+      <br />
+
+      <button type="submit">Lưu thay đổi</button>
+    </form>
+
+    <a href="/categories">← Quay lại danh sách</a>
+  </body>
+</html>

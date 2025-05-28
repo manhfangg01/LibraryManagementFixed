@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>📚 Library Management System</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 30px;
+        background-color: #f4f4f4;
+        text-align: center;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      .menu {
+        margin-top: 40px;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .menu a {
+        display: inline-block;
+        text-decoration: none;
+        padding: 15px 30px;
+        background-color: #4caf50;
+        color: white;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+
+      .menu a:hover {
+        background-color: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📚 Library Management System</h1>
+    <p>Chào mừng bạn đến với hệ thống quản lý thư viện!</p>
+
+    <div class="menu">
+      <a href="/books">📖 Quản lý sách</a>
+      <a href="/categories">📂 Thể loại</a>
+      <a href="/members">👤 Thành viên</a>
+      <a href="/librarians">🧑‍💼 Thủ thư</a>
+      <a href="/borrows">📥 Phiếu mượn</a>
+    </div>
+  </body>
+</html>

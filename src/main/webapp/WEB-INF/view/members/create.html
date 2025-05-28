@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Thêm thành viên mới</title>
+  </head>
+  <body>
+    <h1>➕ Thêm thành viên</h1>
+
+    <form th:action="@{/members/create}" th:object="${member}" method="post" enctype="multipart/form-data">
+      <label>Họ tên:</label>
+      <input type="text" th:field="*{name}" /><br />
+
+      <label>Email:</label>
+      <input type="email" th:field="*{email}" /><br />
+
+      <label>Điện thoại:</label>
+      <input type="text" th:field="*{phone}" /><br />
+
+      <label>Địa chỉ:</label>
+      <input type="text" th:field="*{address}" /><br />
+
+      <label>Ngày đăng ký:</label>
+      <input type="date" th:field="*{membershipDate}" /><br />
+
+      <select name="membershipType">
+        <option value="">Loại thành viên</option>
+        <option th:each="type : ${allMembershipTypes}" th:value="${type}" th:text="${type.label}"></option>
+      </select>
+
+      <label>Trạng thái:</label>
+      <input type="checkbox" th:field="*{status}" /> Hoạt động<br />
+      <label for="profileImage">Ảnh đại diện:</label>
+      <input type="file" id="profileImage" name="profileImage" accept="image/*" /><br />
+      <button type="submit">Lưu</button>
+    </form>
+
+    <br />
+    <a href="/members">⬅️ Quay lại danh sách</a>
+  </body>
+</html>

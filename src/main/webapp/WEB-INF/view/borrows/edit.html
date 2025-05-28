@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chỉnh sửa phiếu mượn</title>
+  </head>
+  <body>
+    <h1>✏️ Chỉnh sửa phiếu mượn</h1>
+
+    <form th:action="@{/borrows/edit}" th:object="${borrow}" method="post">
+      <input type="hidden" th:field="*{id}" />
+
+      <label>Ngày mượn:</label>
+      <input type="date" th:field="*{borrowDate}" required /><br />
+
+      <label>Hạn trả:</label>
+      <input type="date" th:field="*{dueDate}" required /><br />
+
+      <label>Ngày trả:</label>
+      <input type="date" th:field="*{returnDate}" /><br />
+
+      <label>Trạng thái:</label>
+      <select th:field="*{status}">
+        <option th:each="st : ${statuses}" th:value="${st}" th:text="${st}"></option>
+      </select>
+      <br />
+
+      <label>Chọn sách:</label>
+      <select th:field="*{book}" required>
+        <option th:each="b : ${books}" th:value="${b.id}" th:text="${b.title}">Sách</option></select
+      ><br />
+
+      <label>Người mượn:</label>
+      <select th:field="*{member}" required>
+        <option th:each="m : ${members}" th:value="${m.id}" th:text="${m.name}">Thành viên</option></select
+      ><br />
+
+      <label>Thủ thư xử lý:</label>
+      <select th:field="*{librarian}" required>
+        <option th:each="l : ${librarians}" th:value="${l.id}" th:text="${l.name}">Thủ thư</option></select
+      ><br />
+
+      <button type="submit">💾 Cập nhật</button>
+    </form>
+
+    <a href="/borrows">← Quay lại danh sách</a>
+  </body>
+</html>

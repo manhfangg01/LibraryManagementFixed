@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="${'Chi tiết Thể loại: ' + category.name}"></title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 20px;
+        background-color: #f4f7f6;
+        color: #333;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .detail-item {
+        margin-bottom: 15px;
+      }
+      .detail-item strong {
+        display: inline-block;
+        width: 120px;
+        color: #555;
+      }
+      .detail-item p {
+        margin: 0;
+        padding-left: 130px; /* Aligns content with strong tags */
+        text-align: justify;
+      }
+      .book-list {
+        margin-top: 25px;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+      }
+      .book-list h3 {
+        color: #4caf50;
+        margin-bottom: 15px;
+      }
+      .book-list ul {
+        list-style: none;
+        padding: 0;
+      }
+      .book-list li {
+        background-color: #f9f9f9;
+        margin-bottom: 8px;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .book-list li a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .book-list li a:hover {
+        color: #0056b3;
+      }
+      .actions {
+        text-align: center;
+        margin-top: 30px;
+      }
+      .actions a.button {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 0 10px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+      }
+      .actions a.button:hover {
+        background-color: #0056b3;
+      }
+      .actions a.back-button {
+        background-color: #6c757d;
+      }
+      .actions a.back-button:hover {
+        background-color: #5a6268;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 th:text="${'Chi tiết Thể loại: ' + category.name}"></h1>
+
+      <div class="detail-item"><strong>ID:</strong> <span th:text="${category.id}">1</span></div>
+      <div class="detail-item"><strong>Tên:</strong> <span th:text="${category.name}">Tên thể loại</span></div>
+      <div class="detail-item">
+        <strong>Mô tả:</strong>
+        <p th:text="${category.description}">Mô tả chi tiết về thể loại này.</p>
+      </div>
+
+      <div class="book-list">
+        <h3>Sách trong thể loại này:</h3>
+        <ul th:if="${!category.books.isEmpty()}">
+          <li th:each="book : ${category.books}">
+            <span th:text="${book.title}">Tên Sách</span>
+            <a th:href="@{'/books/detail/' + ${book.id}}">Xem chi tiết</a>
+          </li>
+        </ul>
+        <p th:unless="${!category.books.isEmpty()}">Không có sách nào trong thể loại này.</p>
+      </div>
+
+      <div class="actions">
+        <a th:href="@{'/categories/edit/' + ${category.id}}" class="button">✏️ Sửa Thể loại</a>
+        <a th:href="@{/categories}" class="button back-button">⬅️ Quay lại danh sách</a>
+      </div>
+    </div>
+  </body>
+</html>

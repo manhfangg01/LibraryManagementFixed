@@ -1,0 +1,10 @@
+- Tính năng tìm kiếm, filter, sorting (Specification)
+- Dùng Spring validation
+- update file / ảnh
+- upload nhiều file / ảnh 
+- Thống kê số liệu
+- Đăng nhập và phân quyền
+- Phân trang GetMapping, Specification
+- Microserivce
+- Áp dụng spring security
+- Thêm membershipType vào trong create

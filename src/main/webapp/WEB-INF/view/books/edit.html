@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Chỉnh sửa sách</title>
+  </head>
+  <body>
+    <h1>📝 Chỉnh sửa thông tin sách</h1>
+    <div th:if="${error}">
+      <p style="color: red" th:text="${error}"></p>
+    </div>
+
+    <form th:action="@{/books/edit}" th:object="${book}" method="post">
+      <input type="hidden" th:field="*{id}" />
+      <!-- Bắt buộc phải có dòng này để khi gửi lên /edit có thể book mới có trường id-->
+      <label for="title">Tên sách:</label>
+      <input type="text" id="title" th:field="*{title}" required />
+      <br />
+
+      <label for="authorName">Tác giả:</label>
+      <input type="text" id="authorName" th:field="*{authorName}" required />
+      <br />
+
+      <label for="publishedDate">Ngày xuất bản:</label>
+      <input type="date" id="publishedDate" th:field="*{publishedDate}" placeholder="yyyy-MM-dd" required />
+      <br />
+
+      <label>Thể loại:</label>
+      <div th:each="cat : ${categories}">
+        <input type="checkbox" th:field="*{categories}" th:value="${cat.id}" th:checked="${book.categories.contains(cat)}" />
+        <span th:text="${cat.name}"></span><br />
+      </div>
+
+      <button type="submit">Lưu thay đổi</button>
+    </form>
+
+    <a href="/books">← Quay lại danh sách sách</a>
+  </body>
+</html>

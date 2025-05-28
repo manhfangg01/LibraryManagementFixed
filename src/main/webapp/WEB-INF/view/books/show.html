@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>📚 Danh sách sách</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 20px;
+        background-color: #f4f7f6;
+        color: #333;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .container {
+        max-width: 1200px; /* Adjusted max-width for more filter inputs and columns */
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #4caf50;
+        color: white;
+        font-weight: bold;
+        position: relative; /* Cho phép định vị mũi tên sắp xếp */
+      }
+      th a {
+        /* Phong cách cho liên kết sắp xếp trong tiêu đề bảng */
+        color: white;
+        text-decoration: none;
+        display: block;
+        width: 100%;
+      }
+      th a:hover {
+        color: #e0e0e0;
+      }
+      .sort-icon {
+        display: inline-block;
+        margin-left: 5px;
+        font-size: 0.8em;
+      }
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+      tr:hover {
+        background-color: #e9e9e9;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      li {
+        background-color: #e0f2f7;
+        border-radius: 5px;
+        padding: 4px 8px;
+        margin-bottom: 4px;
+        display: inline-block; /* Display categories in a row */
+        margin-right: 10px; /* Spacing between categories */
+        font-size: 0.95em;
+      }
+      li a {
+        color: #007bff; /* Color for the link inside li */
+        text-decoration: none;
+        font-weight: normal; /* Reset font-weight if li had it */
+      }
+      li a:hover {
+        color: #0056b3;
+        text-decoration: underline;
+      }
+      a {
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+      a:hover {
+        color: #0056b3;
+      }
+      button {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 0.9em;
+      }
+      button:hover {
+        background-color: #c82333;
+      }
+      .pagination {
+        text-align: center;
+        margin-top: 25px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .pagination a,
+      .pagination span {
+        display: inline-block;
+        padding: 8px 15px;
+        margin: 0 5px;
+        border-radius: 8px;
+        background-color: #e9ecef;
+        color: #495057;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
+      .pagination a:hover {
+        background-color: #dee2e6;
+      }
+      .pagination span {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+      }
+      .add-book-link {
+        display: block;
+        text-align: center;
+        margin-top: 30px;
+        padding: 12px 25px;
+        background-color: #28a745;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .add-book-link:hover {
+        background-color: #218838;
+      }
+      .search-form {
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap; /* Allows wrapping on smaller screens */
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+      }
+      .search-form input[type="text"],
+      .search-form select {
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        flex-grow: 1;
+        min-width: 150px; /* Ensure inputs don't get too small */
+        height: 42px; /* Standardize height for select and input */
+      }
+      .search-form select[multiple] {
+        height: auto; /* Allow multiple select to expand */
+        min-height: 42px; /* Minimum height for multiple select */
+      }
+      .search-form button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 1em;
+        flex-shrink: 0; /* Prevent button from shrinking */
+        height: 42px; /* Standardize height for button */
+      }
+      .search-form button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📚 Danh sách sách</h1>
+
+      <div class="search-form">
+        <form
+          th:action="@{/books}"
+          method="get"
+          th:object="${filterCriteria}"
+          onsubmit="return cleanFormInputs(this);"
+          style="display: flex; flex-wrap: wrap; gap: 10px; width: 100%; justify-content: center"
+        >
+          <input type="text" th:field="*{title}" placeholder="Tiêu đề sách..." />
+          <input type="text" th:field="*{author}" placeholder="Tác giả..." />
+
+          <select th:field="*{categoryIds}" multiple="multiple">
+            <option value="">-- Chọn thể loại --</option>
+            <option th:each="cat : ${allCategories}" th:value="${cat.id}" th:text="${cat.name}">Thể loại</option>
+          </select>
+
+          <select name="sortBy" th:value="${sortBy}">
+            <option value="">-- Sắp xếp theo --</option>
+            <option value="title" th:selected="${sortBy == 'title'}">Tiêu đề</option>
+            <option value="authorName" th:selected="${sortBy == 'authorName'}">Tác giả</option>
+            <option value="publishedDate" th:selected="${sortBy == 'publishedDate'}">Ngày xuất bản</option>
+          </select>
+
+          <select name="sortDir" th:value="${sortDir}">
+            <option value="">-- Thứ tự --</option>
+            <option value="asc" th:selected="${sortDir == 'asc'}">Tăng dần</option>
+            <option value="desc" th:selected="${sortDir == 'desc'}">Giảm dần</option>
+          </select>
+
+          <input type="hidden" name="page" th:value="${currentPage}" />
+          <input type="hidden" name="size" th:value="${sizePerPage}" />
+          <button type="submit">🔍 Lọc</button>
+        </form>
+      </div>
+
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Tiêu đề</th>
+            <th>Tác giả</th>
+            <th>Ngày xuất bản</th>
+            <th>Thể loại</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="book : ${books}">
+            <td th:text="${book.title}">Tiêu đề</td>
+            <td th:text="${book.authorName}">Tác giả</td>
+            <td th:text="${book.publishedDate}">Ngày</td>
+
+            <td>
+              <ul>
+                <li th:each="category : ${book.categories}">
+                  <a th:href="@{'/categories/detail/' + ${category.id}}" th:text="${category.name}"></a>
+                </li>
+              </ul>
+            </td>
+
+            <td>
+              <a th:href="@{'/books/edit/' + ${book.id}}">✏️ Sửa</a> |
+              <form th:action="@{'/books/delete/' + ${book.id}}" method="post" style="display: inline">
+                <button type="submit">🗑️ Xoá</button>
+              </form>
+            </td>
+          </tr>
+          <tr th:if="${books.isEmpty()}">
+            <td colspan="5" style="text-align: center; padding: 20px">Không tìm thấy sách nào.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <br />
+
+      <div class="pagination">
+        <a
+          th:if="${currentPage > 1}"
+          th:href="@{/books(
+            page=${currentPage - 1},
+            size=${sizePerPage},
+            title=${filterCriteria.title},
+            author=${filterCriteria.author},
+            categoryIds=${filterCriteria.categoryIds},
+            sortBy=${sortBy},
+            sortDir=${sortDir}
+          )}"
+          >⬅️ Trước</a
+        >
+
+        <span>Trang <span th:text="${currentPage}"></span> / <span th:text="${totalPages}"></span></span>
+
+        <a
+          th:if="${currentPage < totalPages}"
+          th:href="@{/books(
+            page=${currentPage + 1},
+            size=${sizePerPage},
+            title=${filterCriteria.title},
+            author=${filterCriteria.author},
+            categoryIds=${filterCriteria.categoryIds},
+            sortBy=${sortBy},
+            sortDir=${sortDir}
+          )}"
+          >Tiếp ➡️</a
+        >
+      </div>
+
+      <a href="/books/create" class="add-book-link">➕ Thêm sách mới</a>
+    </div>
+  </body>
+  <script>
+    function cleanFormInputs(form) {
+      for (let i = 0; i < form.elements.length; i++) {
+        const element = form.elements[i];
+        // Chỉ xử lý các input type text, select và không phải hidden
+        // hoặc nếu bạn muốn xử lý tất cả trừ hidden, hãy điều chỉnh điều kiện
+        if ((element.type === "text" && element.value === "") || (element.tagName === "SELECT" && element.value === "" && !element.multiple)) {
+          // Xử lý select đơn
+          element.disabled = true; // Vô hiệu hóa để không gửi giá trị này
+        }
+        // Xử lý select multiple: nếu không có option nào được chọn
+        if (element.tagName === "SELECT" && element.multiple) {
+          let hasSelectedOption = false;
+          for (let j = 0; j < element.options.length; j++) {
+            if (element.options[j].selected) {
+              hasSelectedOption = true;
+              break;
+            }
+          }
+          if (!hasSelectedOption) {
+            element.disabled = true;
+          }
+        }
+      }
+      return true; // Trả về true để form tiếp tục được gửi
+    }
+  </script>
+</html>

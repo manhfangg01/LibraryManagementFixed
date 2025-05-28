@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Chỉnh sửa thành viên</title>
+  </head>
+  <body>
+    <h1>✏️ Chỉnh sửa thông tin thành viên</h1>
+
+    <form th:action="@{/members/edit}" th:object="${member}" method="post" enctype="multipart/form-data">
+      <input type="hidden" th:field="*{id}" />
+
+      <label>Tên:</label>
+      <input type="text" th:field="*{name}" required /><br />
+
+      <label>Email:</label>
+      <input type="email" th:field="*{email}" required /><br />
+
+      <label>Số điện thoại:</label>
+      <input type="text" th:field="*{phone}" required /><br />
+
+      <label>Địa chỉ:</label>
+      <input type="text" th:field="*{address}" required /><br />
+
+      <label>Ngày tham gia:</label>
+      <input type="date" th:field="*{membershipDate}" required /><br />
+
+      <select name="membershipType" th:field="*{membershipType}">
+        <option value="">Loại thành viên</option>
+        <option th:each="type : ${allMembershipTypes}" th:value="${type}" th:text="${type.label}"></option>
+      </select>
+
+      <label>Trạng thái:</label>
+      <input type="checkbox" th:field="*{status}" /> Hoạt động <br /><br />
+
+      <div class="current-image-section">
+        <p>Ảnh đại diện hiện tại:</p>
+        <div th:if="${member.imageUrl != null and !member.imageUrl.isEmpty()}">
+          <img th:src="${member.imageUrl}" alt="Ảnh thủ thư hiện tại" />
+          <br />
+        </div>
+        <div th:unless="${member.imageUrl != null and !member.imageUrl.isEmpty()}">
+          <span>Không có ảnh đại diện hiện tại.</span>
+        </div>
+      </div>
+      <label for="profileImage">Chọn ảnh mới (để thay thế hoặc thêm):</label>
+      <input type="file" id="profileImage" name="profileImage" accept="image/*" /><br />
+      <button type="submit">Cập nhật</button>
+    </form>
+
+    <a th:href="@{/members}">← Quay lại danh sách</a>
+  </body>
+</html>

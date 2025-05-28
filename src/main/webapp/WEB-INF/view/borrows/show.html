@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>📋 Danh sách phiếu mượn</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 20px;
+        background-color: #f4f7f6;
+        color: #333;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .container {
+        max-width: 1100px; /* Adjusted max-width for more columns in Borrow */
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        border-radius: 8px;
+        overflow: hidden; /* Ensures rounded corners apply to content */
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 12px 15px;
+        text-align: left;
+      }
+      th {
+        background-color: #4caf50;
+        color: white;
+        font-weight: bold;
+      }
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+      tr:hover {
+        background-color: #e9e9e9;
+      }
+      a {
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+      a:hover {
+        color: #0056b3;
+      }
+      button {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-size: 0.9em;
+      }
+      button:hover {
+        background-color: #c82333;
+      }
+      .pagination {
+        text-align: center;
+        margin-top: 25px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .pagination a,
+      .pagination span {
+        display: inline-block;
+        padding: 8px 15px;
+        margin: 0 5px;
+        border-radius: 8px;
+        background-color: #e9ecef;
+        color: #495057;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
+      .pagination a:hover {
+        background-color: #dee2e6;
+      }
+      .pagination span {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+      }
+      .add-link {
+        display: block;
+        text-align: center;
+        margin-top: 30px;
+        padding: 12px 25px;
+        background-color: #28a745;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .add-link:hover {
+        background-color: #218838;
+      }
+      .search-form {
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap; /* Allows wrapping on smaller screens */
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+      }
+      .search-form input[type="text"],
+      .search-form select {
+        padding: 10px 15px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        flex-grow: 1;
+        min-width: 150px; /* Ensure inputs don't get too small */
+      }
+      .search-form button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 1em;
+        flex-shrink: 0; /* Prevent button from shrinking */
+      }
+      .search-form button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📋 Danh sách phiếu mượn</h1>
+
+      <div class="search-form">
+        <form
+          th:action="@{/borrows}"
+          method="get"
+          th:object="${borrowFilterCriteriaDTO}"
+          onsubmit="return cleanFormInputs(this);"
+          style="display: flex; flex-wrap: wrap; gap: 10px; width: 100%; justify-content: center"
+        >
+          <input type="text" th:field="*{memberName}" placeholder="Tên thành viên..." />
+          <input type="text" th:field="*{bookTitle}" placeholder="Tiêu đề sách..." />
+
+          <select th:field="*{status}">
+            <option value="">Tất cả trạng thái</option>
+            <option
+              th:each="borrowStatus : ${allBorrowStatuses}"
+              th:value="${borrowStatus}"
+              th:text="${borrowStatus.displayName}"
+              th:selected="${borrowFilterCriteriaDTO.status != null and borrowFilterCriteriaDTO.status == borrowStatus}"
+            ></option>
+          </select>
+          <input type="text" th:field="*{librarianName}" placeholder="Tên thủ thư..." />
+
+          <input type="hidden" name="page" th:value="${currentPage - 1}" /> <input type="hidden" name="size" th:value="${sizePerPage}" />
+          <button type="submit">🔍 Lọc</button>
+        </form>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Ngày mượn</th>
+            <th>Hạn trả</th>
+            <th>Trạng thái</th>
+            <th>Thành viên</th>
+            <th>Sách</th>
+            <th>Thủ thư</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="borrow : ${borrows}">
+            <td th:text="${borrow.id}"></td>
+            <td th:text="${borrow.borrowDate}"></td>
+            <td th:text="${borrow.dueDate}"></td>
+            <td th:text="${borrow.status}"></td>
+            <td th:text="${borrow.member.name}"></td>
+            <td th:text="${borrow.book.title}"></td>
+            <td th:text="${borrow.librarian.name}"></td>
+            <td>
+              <a th:href="@{'/borrows/edit/' + ${borrow.id}}">✏️ Sửa</a> |
+              <form th:action="@{'/borrows/delete/' + ${borrow.id}}" method="post" style="display: inline">
+                <button type="submit">🗑️ Xoá</button>
+              </form>
+            </td>
+          </tr>
+          <tr th:if="${borrows.isEmpty()}">
+            <td colspan="8" style="text-align: center; padding: 20px">Không tìm thấy phiếu mượn nào.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination">
+        <a
+          th:if="${currentPage > 1}"
+          th:href="@{/borrows(page=${currentPage - 2}, size=${sizePerPage}, memberName=${borrowFilterCriteriaDTO.memberName}, bookTitle=${borrowFilterCriteriaDTO.bookTitle}, status=${borrowFilterCriteriaDTO.status}, librarianName=${borrowFilterCriteriaDTO.librarianName})}"
+          >⬅️ Trước</a
+        >
+        <span>Trang <span th:text="${currentPage}"></span> / <span th:text="${totalPages-1}"></span></span>
+        <a
+          th:if="${currentPage < totalPages-1}"
+          th:href="@{/borrows(page=${currentPage}, size=${sizePerPage}, memberName=${borrowFilterCriteriaDTO.memberName}, bookTitle=${borrowFilterCriteriaDTO.bookTitle}, status=${borrowFilterCriteriaDTO.status}, librarianName=${borrowFilterCriteriaDTO.librarianName})}"
+          >Tiếp ➡️</a
+        >
+      </div>
+
+      <br />
+      <a href="/borrows/create" class="add-link">➕ Thêm phiếu mượn mới</a>
+    </div>
+  </body>
+
+  <script>
+    function cleanFormInputs(form) {
+      for (let i = 0; i < form.elements.length; i++) {
+        const element = form.elements[i];
+        // Chỉ xử lý các input type text, select và không phải hidden
+        // hoặc nếu bạn muốn xử lý tất cả trừ hidden, hãy điều chỉnh điều kiện
+        if ((element.type === "text" || element.tagName === "SELECT") && element.value === "") {
+          element.disabled = true; // Vô hiệu hóa để không gửi giá trị này
+        }
+      }
+      return true; // Trả về true để form tiếp tục được gửi
+    }
+  </script>
+</html>

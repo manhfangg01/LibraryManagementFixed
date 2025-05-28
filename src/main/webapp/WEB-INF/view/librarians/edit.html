@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sửa thủ thư</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 20px;
+        background-color: #f4f7f6;
+        color: #333;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .container {
+        max-width: 600px; /* Kích thước phù hợp cho form */
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      form label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #555;
+      }
+      form input[type="text"],
+      form input[type="email"],
+      form input[type="password"],
+      form input[type="file"] {
+        width: calc(100% - 22px); /* Trừ padding và border */
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        box-sizing: border-box; /* Bao gồm padding và border vào width */
+      }
+      .current-image-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px dashed #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+      }
+      .current-image-section img {
+        max-width: 150px;
+        height: auto;
+        border-radius: 8px;
+        margin-top: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+      .current-image-section p {
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      form button {
+        background-color: #007bff; /* Xanh dương cho nút cập nhật */
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background-color 0.3s ease;
+        margin-right: 10px;
+      }
+      form button:hover {
+        background-color: #0056b3;
+      }
+      .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 15px;
+        background-color: #6c757d;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        transition: background-color 0.3s ease;
+      }
+      .back-link:hover {
+        background-color: #5a6268;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📝 Chỉnh sửa thủ thư</h1>
+
+      <form th:action="@{/librarians/edit}" th:object="${librarian}" method="post" enctype="multipart/form-data">
+        <input type="hidden" th:field="*{id}" />
+
+        <label for="name">Tên:</label>
+        <input type="text" id="name" th:field="*{name}" required /><br />
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}" required /><br />
+
+        <!-- Mật khẩu không nên hiển thị ở đây vì lý do bảo mật.
+             Nếu muốn đổi mật khẩu, nên có một form riêng hoặc một trường đặc biệt.
+             Nếu bạn vẫn muốn có, hãy thêm nó vào đây.
+             Hiện tại tôi sẽ bỏ qua trường password để tập trung vào ảnh. -->
+        <!-- <label for="password">Mật khẩu:</label>
+        <input type="password" id="password" th:field="*{password}" /><br /> -->
+
+        <label for="role">Vai trò:</label>
+        <input type="text" id="role" th:field="*{role}" required /><br />
+
+        <div class="current-image-section">
+          <p>Ảnh đại diện hiện tại:</p>
+          <div th:if="${librarian.imageUrl != null and !librarian.imageUrl.isEmpty()}">
+            <img th:src="${librarian.imageUrl}" alt="Ảnh thủ thư hiện tại" />
+            <br />
+          </div>
+          <div th:unless="${librarian.imageUrl != null and !librarian.imageUrl.isEmpty()}">
+            <span>Không có ảnh đại diện hiện tại.</span>
+          </div>
+        </div>
+
+        <label for="profileImage">Chọn ảnh mới (để thay thế hoặc thêm):</label>
+        <input type="file" id="profileImage" name="profileImage" accept="image/*" /><br />
+        <button type="submit">Cập nhật</button>
+        <a th:href="@{/librarians}" class="back-link">← Quay lại</a>
+      </form>
+    </div>
+  </body>
+</html>

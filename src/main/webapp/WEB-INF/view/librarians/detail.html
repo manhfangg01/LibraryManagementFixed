@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chi tiết Thủ thư</title>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 20px;
+        background-color: #f4f7f6;
+        color: #333;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .container {
+        max-width: 800px; /* Kích thước phù hợp cho trang chi tiết */
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+      .detail-item {
+        margin-bottom: 15px;
+        padding: 10px 0;
+        border-bottom: 1px dashed #eee;
+      }
+      .detail-item:last-child {
+        border-bottom: none;
+      }
+      .detail-item strong {
+        display: inline-block;
+        width: 120px; /* Căn chỉnh các nhãn */
+        color: #555;
+      }
+      .detail-item span {
+        color: #333;
+      }
+      .profile-image {
+        display: block;
+        max-width: 200px;
+        height: auto;
+        border-radius: 8px;
+        margin-top: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .actions {
+        margin-top: 30px;
+        text-align: center;
+      }
+      .actions a,
+      .actions button {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        margin: 0 10px;
+        border: none;
+      }
+      .actions a {
+        background-color: #6c757d; /* Xám cho nút quay lại */
+        color: white;
+      }
+      .actions a:hover {
+        background-color: #5a6268;
+      }
+      .actions .edit-button {
+        background-color: #007bff; /* Xanh dương cho nút sửa */
+        color: white;
+      }
+      .actions .edit-button:hover {
+        background-color: #0056b3;
+      }
+      .actions .delete-button {
+        background-color: #dc3545; /* Đỏ cho nút xóa */
+        color: white;
+      }
+      .actions .delete-button:hover {
+        background-color: #c82333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Chi tiết Thủ thư</h1>
+
+      <div th:if="${librarian != null}">
+        <div class="detail-item">
+          <strong>ID:</strong>
+          <span th:text="${librarian.id}">1</span>
+        </div>
+        <div class="detail-item">
+          <strong>Họ tên:</strong>
+          <span th:text="${librarian.name}">Nguyễn Văn A</span>
+        </div>
+        <div class="detail-item">
+          <strong>Email:</strong>
+          <span th:text="${librarian.email}">nguyenvana@example.com</span>
+        </div>
+        <div class="detail-item">
+          <strong>Vai trò:</strong>
+          <span th:text="${librarian.role}">ADMIN</span>
+        </div>
+
+        <div class="detail-item" th:if="${librarian.imageUrl != null and !librarian.imageUrl.isEmpty()}">
+          <strong>Ảnh đại diện:</strong>
+          <img th:src="${librarian.imageUrl}" alt="Ảnh thủ thư" class="profile-image" />
+        </div>
+        <div class="detail-item" th:unless="${librarian.imageUrl != null and !librarian.imageUrl.isEmpty()}">
+          <strong>Ảnh đại diện:</strong>
+          <span>Không có ảnh</span>
+        </div>
+
+        <!-- <div class="detail-item">
+                    <strong>Số lượng mượn:</strong>
+                    <span th:text="${librarian.borrows != null ? librarian.borrows.size() : 0}">0</span>
+                </div> -->
+      </div>
+      <div th:unless="${librarian != null}">
+        <p style="text-align: center; color: #dc3545">Không tìm thấy thông tin thủ thư.</p>
+      </div>
+
+      <div class="actions">
+        <a th:href="@{'/librarians/edit/' + ${librarian.id}}" class="edit-button">✏️ Sửa</a>
+        <form th:action="@{'/librarians/delete/' + ${librarian.id}}" method="post" style="display: inline">
+          <button type="submit" class="delete-button" onclick="return confirm('Bạn có chắc chắn muốn xóa thủ thư này không?');">🗑️ Xóa</button>
+        </form>
+        <a th:href="@{/librarians}" class="back-button">⬅️ Quay lại danh sách</a>
+      </div>
+    </div>
+  </body>
+</html>
