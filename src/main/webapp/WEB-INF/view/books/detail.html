@@ -98,6 +98,10 @@
       <h1 th:text="${'Chi tiết Sách: ' + book.title}"></h1>
 
       <div class="detail-item"><strong>ID:</strong> <span th:text="${book.id}">1</span></div>
+      <div class="detail-item" th:if="${book.imageUrl != null and !book.imageUrl.isEmpty()}">
+        <strong>Ảnh bìa sách:</strong>
+        <img th:src="${book.imageUrl}" alt="Ảnh thành viên" class="profile-image" />
+      </div>
       <div class="detail-item"><strong>Tiêu đề:</strong> <span th:text="${book.title}">Tiêu đề sách</span></div>
       <div class="detail-item"><strong>Tác giả:</strong> <span th:text="${book.authorName}">Tên tác giả</span></div>
       <div class="detail-item"><strong>Ngày xuất bản:</strong> <span th:text="${book.publishedDate}">Ngày xuất bản</span></div>

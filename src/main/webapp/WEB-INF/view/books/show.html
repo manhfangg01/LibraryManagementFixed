@@ -197,6 +197,7 @@
           th:object="${filterCriteria}"
           onsubmit="return cleanFormInputs(this);"
           style="display: flex; flex-wrap: wrap; gap: 10px; width: 100%; justify-content: center"
+          enctype="multipart/form-data"
         >
           <input type="text" th:field="*{title}" placeholder="Tiêu đề sách..." />
           <input type="text" th:field="*{author}" placeholder="Tác giả..." />
@@ -250,10 +251,14 @@
             </td>
 
             <td>
-              <a th:href="@{'/books/edit/' + ${book.id}}">✏️ Sửa</a> |
-              <form th:action="@{'/books/delete/' + ${book.id}}" method="post" style="display: inline">
-                <button type="submit">🗑️ Xoá</button>
-              </form>
+              <div class="actions">
+                <a th:href="@{'/books/detail/' + ${book.id}}" style="margin-right: 5px">ℹ️ Chi tiết</a> | <a th:href="@{'/books/edit/' + ${book.id}}">✏️ Sửa</a> |
+                <form th:action="@{'/books/delete/' + ${book.id}}" method="post" style="display: inline">
+                  <input type="hidden" name="page" th:value="${currentPage}" />
+                  <input type="hidden" name="size" th:value="${sizePerPage}" />
+                  <button type="submit">🗑️ Xóa</button>
+                </form>
+              </div>
             </td>
           </tr>
           <tr th:if="${books.isEmpty()}">
@@ -279,10 +284,10 @@
           >⬅️ Trước</a
         >
 
-        <span>Trang <span th:text="${currentPage}"></span> / <span th:text="${totalPages}"></span></span>
+        <span>Trang <span th:text="${currentPage}"></span> / <span th:text="${totalPages-1}"></span></span>
 
         <a
-          th:if="${currentPage < totalPages}"
+          th:if="${currentPage < totalPages-1}"
           th:href="@{/books(
             page=${currentPage + 1},
             size=${sizePerPage},

@@ -9,7 +9,7 @@
       <p style="color: red" th:text="${error}"></p>
     </div>
 
-    <form th:action="@{/books/edit}" th:object="${book}" method="post">
+    <form th:action="@{/books/edit}" th:object="${book}" method="post" enctype="multipart/form-data">
       <input type="hidden" th:field="*{id}" />
       <!-- Bắt buộc phải có dòng này để khi gửi lên /edit có thể book mới có trường id-->
       <label for="title">Tên sách:</label>
@@ -29,6 +29,19 @@
         <input type="checkbox" th:field="*{categories}" th:value="${cat.id}" th:checked="${book.categories.contains(cat)}" />
         <span th:text="${cat.name}"></span><br />
       </div>
+
+      <div class="current-image-section">
+        <p>Ảnh đại diện hiện tại:</p>
+        <div th:if="${book.imageUrl != null and !book.imageUrl.isEmpty()}">
+          <img th:src="${book.imageUrl}" alt="Ảnh bìa hiện tại" />
+          <br />
+        </div>
+        <div th:unless="${book.imageUrl != null and !book.imageUrl.isEmpty()}">
+          <span>Không có ảnh bìa hiện tại.</span>
+        </div>
+      </div>
+      <label for="bookImage">Chọn ảnh mới (để thay thế hoặc thêm):</label>
+      <input type="file" id="bookImage" name="bookImage" accept="image/*" /><br />
 
       <button type="submit">Lưu thay đổi</button>
     </form>

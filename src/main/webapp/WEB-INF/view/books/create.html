@@ -10,7 +10,7 @@
       <p th:text="${ObjectExisted}" style="color: red"></p>
     </div>
 
-    <form th:action="@{/books}" th:object="${book}" method="post">
+    <form th:action="@{/books}" th:object="${book}" method="post" enctype="multipart/form-data">
       <label for="title">Tên sách:</label>
       <input type="text" id="title" th:field="*{title}" required />
       <br />
@@ -28,6 +28,9 @@
       <label for="publishedDate">Ngày xuất bản:</label>
       <input type="date" id="publishedDate" th:field="*{publishedDate}" required />
       <br />
+
+      <label for="bookImage">Ảnh minh họa sách:</label>
+      <input type="file" id="bookImage" name="bookImage" accept="image/*" /><br />
 
       <button type="submit">Lưu sách</button>
     </form>

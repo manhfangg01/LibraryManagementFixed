@@ -1,5 +1,6 @@
 package librarymanagement.vn.library.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,11 +16,15 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import librarymanagement.vn.library.domain.dto.BookFilterCriteriaDTO;
 import librarymanagement.vn.library.domain.model.Book;
 import librarymanagement.vn.library.domain.model.Category;
+import librarymanagement.vn.library.domain.model.Librarian;
+import librarymanagement.vn.library.domain.model.Book;
 import librarymanagement.vn.library.domain.service.BookService;
 import librarymanagement.vn.library.domain.service.CategoryService;
+import librarymanagement.vn.library.domain.service.azure.AzureBlobService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -30,10 +35,12 @@ public class BookController {
 
     private final BookService bookService;
     private final CategoryService categoryService;
+    private final AzureBlobService azureBlobService;
 
-    public BookController(BookService bookService, CategoryService categoryService) {
+    public BookController(BookService bookService, CategoryService categoryService, AzureBlobService azureBlobService) {
         this.bookService = bookService;
         this.categoryService = categoryService;
+        this.azureBlobService = azureBlobService;
     }
 
     @GetMapping("/books")
@@ -81,16 +88,33 @@ public class BookController {
     }
 
     @PostMapping("/books")
-    public String postCreatedBook(@ModelAttribute("book") Book book, Model model) {
-        if (book != null) {
-            if (this.bookService.fetchBookByTitle(book.getTitle()).isPresent()) {
-                model.addAttribute("ObjectExisted", "Đã tồn tại sách này rồi");
-                model.addAttribute("newbook", book); // giữ lại dữ liệu người dùng nhập
-                return "/categories/create";
-            } else {
-                this.bookService.saveBook(book);
+    public String postCreatedBook(@ModelAttribute("book") Book book, Model model,
+            @RequestParam("bookImage") MultipartFile file) {
+
+        try {
+            // Xử lý upload ảnh nếu có
+            if (file != null && !file.isEmpty()) {
+                String imageUrl = azureBlobService.uploadFile(file);
+                book.setImageUrl(imageUrl);
+            } else if (book.getId() != null) {
+                // Nếu là cập nhật và không có file mới, giữ nguyên ảnh cũ
+                Optional<Book> existingBook = bookService.fetchBookById(book.getId());
+                if (existingBook.isPresent()) {
+                    book.setImageUrl(existingBook.get().getImageUrl());
+                }
             }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "redirect:/books";
         }
+
+        if (this.bookService.fetchBookByTitle(book.getTitle()).isPresent()) {
+            model.addAttribute("ObjectExisted", "Đã tồn tại sách này rồi");
+            model.addAttribute("newbook", book); // giữ lại dữ liệu người dùng nhập
+            return "/categories/create";
+        }
+        this.bookService.saveBook(book);
         return "redirect:/books";
 
     }
@@ -108,7 +132,8 @@ public class BookController {
     }
 
     @PostMapping("/books/edit")
-    public String updateBook(@ModelAttribute("book") Book book, Model model) {
+    public String updateBook(@ModelAttribute("book") Book book, Model model,
+            @RequestParam("bookImage") MultipartFile file) {
         Optional<Book> existingBook = bookService.fetchBookById(book.getId());
 
         if (existingBook.isPresent() && existingBook.get().getId() != book.getId()) {
@@ -116,20 +141,48 @@ public class BookController {
             model.addAttribute("book", book); // giữ lại dữ liệu người dùng nhập
             return "/books/edit";
         }
+        try {
+            // Xử lý upload ảnh nếu có
+            if (file != null && !file.isEmpty()) {
+                String imageUrl = azureBlobService.uploadFile(file);
+                book.setImageUrl(imageUrl);
+            } else if (book.getId() != null) {
+                // Nếu là cập nhật và không có file mới, giữ nguyên ảnh cũ
+                Optional<Book> optionalBook = bookService.fetchBookById(book.getId());
+                if (optionalBook.isPresent()) {
+                    book.setImageUrl(optionalBook.get().getImageUrl());
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "redirect:/books";
+        }
+
         Book realBook = existingBook.get();
         realBook.setAuthorName(book.getAuthorName());
         realBook.setBorrows(book.getBorrows());
         realBook.setCategories(book.getCategories());
         realBook.setPublishedDate(book.getPublishedDate());
         realBook.setTitle(book.getTitle());
+        realBook.setImageUrl(book.getImageUrl());
         bookService.saveBook(realBook); // phải gọi chỗ này
         return "redirect:/books";
     }
 
     @PostMapping("books/delete/{id}")
     public String deleteBook(@PathVariable("id") long id) {
+        Optional<Book> optionalBook = this.bookService.fetchBookById(id);
         if (this.bookService.fetchBookById(id).isEmpty()) {
             throw new RuntimeException("book not found");
+        }
+        Book book = optionalBook.get();
+
+        if (book.getImageUrl() != null && !book.getImageUrl().isEmpty()) {
+            String blobName = azureBlobService.getBlobNameFromUrl(book.getImageUrl());
+            if (blobName != null) {
+                azureBlobService.deleteFile(blobName);
+            }
         }
         this.bookService.deleteById(id);
         return "redirect:/books";
