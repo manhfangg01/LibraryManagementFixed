@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,22 +17,24 @@ import librarymanagement.vn.library.domain.dto.LibrarianFilterCriteriaDTO;
 import librarymanagement.vn.library.domain.model.Librarian;
 import librarymanagement.vn.library.domain.service.LibrarianService;
 import librarymanagement.vn.library.domain.service.azure.AzureBlobService;
+import librarymanagement.vn.library.domain.service.paginationAdjustment.PaginationService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class LibrarianController {
     private final LibrarianService librarianService;
     private final AzureBlobService azureBlobService;
+    private final PaginationService paginationService;
 
     public LibrarianController(LibrarianService librarianService,
-            AzureBlobService azureBlobService) {
+            AzureBlobService azureBlobService, PaginationService paginationService) {
         this.librarianService = librarianService;
         this.azureBlobService = azureBlobService;
+        this.paginationService = paginationService;
     }
 
     @GetMapping("/librarians")
@@ -73,7 +74,9 @@ public class LibrarianController {
 
     @PostMapping("/librarians/create")
     public String saveLibrarian(@ModelAttribute Librarian librarian,
-            @RequestParam(value = "profileImage", required = false) MultipartFile file) {
+            @RequestParam(value = "profileImage", required = false) MultipartFile file,
+            @RequestParam(value = "page", defaultValue = "1") int page, // Thêm tham số page
+            @RequestParam(value = "size", defaultValue = "5") int size) {
         try {
             // Xử lý upload ảnh nếu có
             if (file != null && !file.isEmpty()) {

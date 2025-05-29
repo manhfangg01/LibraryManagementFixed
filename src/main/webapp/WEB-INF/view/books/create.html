@@ -2,6 +2,34 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <title>Thêm sách mới</title>
+    <style>
+      /* Basic styling for consistency */
+      label {
+        display: block; /* Ensures each label starts on a new line */
+        margin-top: 10px;
+        margin-bottom: 5px;
+      }
+      input[type="text"],
+      input[type="date"] {
+        width: 300px;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 15px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+    </style>
   </head>
   <body>
     <h1>➕ Thêm sách mới</h1>
@@ -9,13 +37,16 @@
     <div th:if="${ObjectExisted}">
       <p th:text="${ObjectExisted}" style="color: red"></p>
     </div>
+    <div th:if="${errorMessage}">
+      <p style="color: red" th:text="${errorMessage}"></p>
+    </div>
 
     <form th:action="@{/books}" th:object="${book}" method="post" enctype="multipart/form-data">
       <label for="title">Tên sách:</label>
       <input type="text" id="title" th:field="*{title}" required />
       <br />
 
-      <label for="author">Tác giả:</label>
+      <label for="authorName">Tác giả:</label>
       <input type="text" id="authorName" th:field="*{authorName}" required />
       <br />
 
@@ -29,8 +60,8 @@
       <input type="date" id="publishedDate" th:field="*{publishedDate}" required />
       <br />
 
-      <label for="bookImage">Ảnh minh họa sách:</label>
-      <input type="file" id="bookImage" name="bookImage" accept="image/*" /><br />
+      <label for="bookImages">Ảnh minh họa sách:</label>
+      <input type="file" id="bookImages" name="bookImages" accept="image/*" multiple /><br />
 
       <button type="submit">Lưu sách</button>
     </form>

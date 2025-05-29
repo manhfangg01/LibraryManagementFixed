@@ -2,6 +2,9 @@ package librarymanagement.vn.library.domain.model;
 
 import java.util.List;
 
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -29,7 +32,11 @@ public class Book {
     private String title;
     private String authorName;
     private String publishedDate;
-    private String imageUrl;
+    @ElementCollection // Đánh dấu thuộc tính đa trị
+    @CollectionTable(name = "book_images", joinColumns = @JoinColumn(name = "book_id")) // Tạo bảng để quản lý đa trị
+                                                                                        // book_images
+    @Column(name = "image_url") // tên cột trong bảng book_images
+    private List<String> imageUrls;
 
     @OneToMany(mappedBy = "book")
     private List<Borrow> borrows;

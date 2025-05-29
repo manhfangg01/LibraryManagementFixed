@@ -36,6 +36,21 @@
         padding-left: 160px; /* Aligns content with strong tags */
         text-align: justify;
       }
+      /* New style for image gallery */
+      .book-images-gallery {
+        display: flex; /* Hiển thị ảnh cạnh nhau */
+        flex-wrap: wrap; /* Cho phép ảnh xuống dòng nếu không đủ chỗ */
+        gap: 10px; /* Khoảng cách giữa các ảnh */
+        margin-top: 10px;
+        padding-left: 160px; /* Căn chỉnh với label */
+      }
+      .book-images-gallery img {
+        max-width: 150px; /* Kích thước tối đa cho mỗi ảnh */
+        height: auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
       .category-list {
         margin-top: 25px;
         border-top: 1px solid #eee;
@@ -98,17 +113,21 @@
       <h1 th:text="${'Chi tiết Sách: ' + book.title}"></h1>
 
       <div class="detail-item"><strong>ID:</strong> <span th:text="${book.id}">1</span></div>
-      <div class="detail-item" th:if="${book.imageUrl != null and !book.imageUrl.isEmpty()}">
+
+      <div class="detail-item">
         <strong>Ảnh bìa sách:</strong>
-        <img th:src="${book.imageUrl}" alt="Ảnh thành viên" class="profile-image" />
+        <div th:if="${book.imageUrls != null and !book.imageUrls.isEmpty()}" class="book-images-gallery">
+          <img th:each="imageUrl : ${book.imageUrls}" th:src="${imageUrl}" alt="Ảnh bìa sách" />
+        </div>
+        <div th:unless="${book.imageUrls != null and !book.imageUrls.isEmpty()}">
+          <p style="padding-left: 160px">Không có ảnh bìa nào.</p>
+        </div>
       </div>
+
       <div class="detail-item"><strong>Tiêu đề:</strong> <span th:text="${book.title}">Tiêu đề sách</span></div>
       <div class="detail-item"><strong>Tác giả:</strong> <span th:text="${book.authorName}">Tên tác giả</span></div>
       <div class="detail-item"><strong>Ngày xuất bản:</strong> <span th:text="${book.publishedDate}">Ngày xuất bản</span></div>
-      <div class="detail-item">
-        <!-- <strong>Mô tả:</strong>
-        <p th:text="${book.description}">Mô tả chi tiết về cuốn sách này.</p> -->
-      </div>
+      <div class="detail-item"></div>
 
       <div class="category-list">
         <h3>Thể loại:</h3>

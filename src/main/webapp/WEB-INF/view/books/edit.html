@@ -2,16 +2,134 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <title>Chỉnh sửa sách</title>
+    <style>
+      /* CSS giữ nguyên */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f4;
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: 20px auto;
+      }
+      label {
+        display: block;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="text"],
+      input[type="date"],
+      select {
+        width: calc(100% - 16px);
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .checkbox-group div {
+        display: inline-block;
+        margin-right: 15px;
+      }
+      .current-image-section,
+      .new-image-preview {
+        margin-top: 20px;
+        border: 1px dashed #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+      }
+      .image-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .image-item {
+        position: relative;
+        border: 1px solid #ddd;
+        padding: 3px;
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+      }
+      .image-item img {
+        max-width: 120px;
+        height: auto;
+        display: block;
+        border-radius: 3px;
+      }
+      .remove-image-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      .remove-image-btn:hover {
+        background-color: #c82333;
+      }
+      button[type="submit"] {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 20px;
+        font-size: 16px;
+      }
+      button[type="submit"]:hover {
+        background-color: #0056b3;
+      }
+      a {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #007bff;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .error-message {
+        color: red;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+    </style>
   </head>
   <body>
     <h1>📝 Chỉnh sửa thông tin sách</h1>
-    <div th:if="${error}">
-      <p style="color: red" th:text="${error}"></p>
+    <div th:if="${ObjectExisted}" class="error-message">
+      <p th:text="${ObjectExisted}"></p>
+    </div>
+    <div th:if="${errorMessage}" class="error-message">
+      <p th:text="${errorMessage}"></p>
     </div>
 
     <form th:action="@{/books/edit}" th:object="${book}" method="post" enctype="multipart/form-data">
       <input type="hidden" th:field="*{id}" />
-      <!-- Bắt buộc phải có dòng này để khi gửi lên /edit có thể book mới có trường id-->
+
       <label for="title">Tên sách:</label>
       <input type="text" id="title" th:field="*{title}" required />
       <br />
@@ -25,27 +143,106 @@
       <br />
 
       <label>Thể loại:</label>
-      <div th:each="cat : ${categories}">
-        <input type="checkbox" th:field="*{categories}" th:value="${cat.id}" th:checked="${book.categories.contains(cat)}" />
-        <span th:text="${cat.name}"></span><br />
+      <div class="checkbox-group">
+        <div th:each="cat : ${categories}">
+          <input type="checkbox" th:field="*{categories}" th:value="${cat.id}" th:checked="${book.categories != null && book.categories.contains(cat)}" />
+          <span th:text="${cat.name}"></span><br />
+        </div>
       </div>
 
       <div class="current-image-section">
-        <p>Ảnh đại diện hiện tại:</p>
-        <div th:if="${book.imageUrl != null and !book.imageUrl.isEmpty()}">
-          <img th:src="${book.imageUrl}" alt="Ảnh bìa hiện tại" />
-          <br />
+        <p>Ảnh hiện tại:</p>
+        <div th:if="${book.imageUrls != null and !book.imageUrls.isEmpty()}" class="image-container" id="existingImagesContainer">
+          <div th:each="imgUrl : ${book.imageUrls}" class="image-item" th:data-image-url="${imgUrl}">
+            <img th:src="${imgUrl}" alt="Ảnh bìa sách" />
+            <button type="button" class="remove-image-btn" onclick="removeExistingImage(this)">X</button>
+            <input type="hidden" name="retainedImageUrls" th:value="${imgUrl}" class="retained-url-input" />
+          </div>
         </div>
-        <div th:unless="${book.imageUrl != null and !book.imageUrl.isEmpty()}">
-          <span>Không có ảnh bìa hiện tại.</span>
+        <div th:unless="${book.imageUrls != null and !book.imageUrls.isEmpty()}">
+          <span>Không có ảnh nào cho sách này.</span>
         </div>
       </div>
-      <label for="bookImage">Chọn ảnh mới (để thay thế hoặc thêm):</label>
-      <input type="file" id="bookImage" name="bookImage" accept="image/*" /><br />
+
+      <label for="bookImages">Thêm ảnh mới:</label>
+      <input type="file" id="bookImages" name="bookImages" accept="image/*" multiple onchange="addFilesToSelection(event)" /><br />
+
+      <div class="new-image-preview">
+        <p>Ảnh mới sẽ được thêm:</p>
+        <div class="image-container" id="newImagesPreviewContainer"></div>
+      </div>
 
       <button type="submit">Lưu thay đổi</button>
     </form>
 
     <a href="/books">← Quay lại danh sách sách</a>
+
+    <script th:inline="javascript">
+      /*<![CDATA[*/
+
+      let selectedNewFiles = [];
+      const newImagesPreviewContainer = document.getElementById("newImagesPreviewContainer");
+      const bookImagesInput = document.getElementById("bookImages");
+
+      function removeExistingImage(button) {
+        const imageItem = button.closest(".image-item");
+        // Tìm hidden input liên quan và xóa nó khỏi DOM
+        const hiddenInput = imageItem.querySelector(".retained-url-input");
+        if (hiddenInput) {
+          hiddenInput.remove(); // Xóa input này đi, nghĩa là URL này sẽ không được gửi lên backend
+        }
+        imageItem.remove(); // Xóa ảnh khỏi giao diện
+      }
+
+      function addFilesToSelection(event) {
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+          selectedNewFiles.push(files[i]);
+        }
+        bookImagesInput.value = "";
+        updateNewImagesPreview();
+      }
+
+      function updateNewImagesPreview() {
+        newImagesPreviewContainer.innerHTML = "";
+
+        if (selectedNewFiles.length === 0 && newImagesPreviewContainer.closest(".new-image-preview")) {
+          newImagesPreviewContainer.closest(".new-image-preview").style.display = "none";
+          return;
+        } else if (newImagesPreviewContainer.closest(".new-image-preview")) {
+          newImagesPreviewContainer.closest(".new-image-preview").style.display = "block";
+        }
+
+        selectedNewFiles.forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const imgItem = document.createElement("div");
+            imgItem.className = "image-item";
+            imgItem.innerHTML = `
+                      <img src="${e.target.result}" alt="New Image"/>
+                      <button type="button" class="remove-image-btn" data-index="${index}" onclick="removeNewImage(this)">X</button>
+                  `;
+            newImagesPreviewContainer.appendChild(imgItem);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function removeNewImage(button) {
+        const indexToRemove = parseInt(button.dataset.index);
+        selectedNewFiles.splice(indexToRemove, 1);
+        updateNewImagesPreview();
+      }
+
+      document.querySelector("form").addEventListener("submit", function (event) {
+        const dataTransfer = new DataTransfer();
+        selectedNewFiles.forEach((file) => {
+          dataTransfer.items.add(file);
+        });
+        bookImagesInput.files = dataTransfer.files;
+      });
+
+      /*]]>*/
+    </script>
   </body>
 </html>

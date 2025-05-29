@@ -1,6 +1,7 @@
 package librarymanagement.vn.library.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ import librarymanagement.vn.library.domain.model.Book;
 import librarymanagement.vn.library.domain.service.BookService;
 import librarymanagement.vn.library.domain.service.CategoryService;
 import librarymanagement.vn.library.domain.service.azure.AzureBlobService;
+import librarymanagement.vn.library.domain.service.paginationAdjustment.PaginationService;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,6 +43,7 @@ public class BookController {
         this.bookService = bookService;
         this.categoryService = categoryService;
         this.azureBlobService = azureBlobService;
+
     }
 
     @GetMapping("/books")
@@ -55,23 +58,16 @@ public class BookController {
         Sort sort = sortDir.equalsIgnoreCase("ASC") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
         Pageable pageable = PageRequest.of(Math.max(0, page), size, sort);
-
-        // Lấy tất cả các thể loại để hiển thị trong dropdown
         List<Category> allCategories = categoryService.fetchAllCategories();
-
-        // Gọi service với các bộ lọc từ DTO
         Page<Book> pageBooks = this.bookService.fetchAllBooksWithPaginationAndNameSpecification(
                 pageable,
-                filterCriteria // Truyền toàn bộ đối tượng DTO BookFilterCriteria
-        );
+                filterCriteria);
         List<Book> books = pageBooks.getContent();
 
-        model.addAttribute("books", books);
         model.addAttribute("currentPage", page);
         model.addAttribute("sizePerPage", size);
+        model.addAttribute("books", books);
         model.addAttribute("totalPages", pageBooks.getTotalPages());
-
-        // Truyền đối tượng filterCriteria trở lại view để giữ lại giá trị trong form
         model.addAttribute("filterCriteria", filterCriteria);
         model.addAttribute("allCategories", allCategories);
         model.addAttribute("sortBy", sortBy);
@@ -89,34 +85,42 @@ public class BookController {
 
     @PostMapping("/books")
     public String postCreatedBook(@ModelAttribute("book") Book book, Model model,
-            @RequestParam("bookImage") MultipartFile file) {
+            @RequestParam(value = "bookImages", required = false) List<MultipartFile> files) {
+        // Logic này chỉ dành cho việc TẠO SÁCH MỚI
 
         try {
-            // Xử lý upload ảnh nếu có
-            if (file != null && !file.isEmpty()) {
-                String imageUrl = azureBlobService.uploadFile(file);
-                book.setImageUrl(imageUrl);
-            } else if (book.getId() != null) {
-                // Nếu là cập nhật và không có file mới, giữ nguyên ảnh cũ
-                Optional<Book> existingBook = bookService.fetchBookById(book.getId());
-                if (existingBook.isPresent()) {
-                    book.setImageUrl(existingBook.get().getImageUrl());
+            List<String> newImageUrls = new ArrayList<>();
+            // Nếu có file được cung cấp và không rỗng, tải lên
+            if (files != null && !files.isEmpty() && files.stream().anyMatch(f -> !f.isEmpty())) {
+                for (MultipartFile file : files) {
+                    if (!file.isEmpty()) {
+                        String imageUrl = azureBlobService.uploadFile(file);
+                        newImageUrls.add(imageUrl);
+                    }
                 }
             }
+            book.setImageUrls(newImageUrls); // Gán danh sách URL ảnh vào sách mới
 
         } catch (IOException e) {
             e.printStackTrace();
-            return "redirect:/books";
+            model.addAttribute("errorMessage", "Lỗi khi tải lên ảnh: " + e.getMessage());
+            model.addAttribute("book", book); // Giữ lại dữ liệu người dùng nhập
+            model.addAttribute("categories", categoryService.fetchAllCategories());
+            return "books/create"; // Trả về form tạo
         }
 
+        // Kiểm tra trùng lặp tiêu đề cho sách MỚI
         if (this.bookService.fetchBookByTitle(book.getTitle()).isPresent()) {
             model.addAttribute("ObjectExisted", "Đã tồn tại sách này rồi");
-            model.addAttribute("newbook", book); // giữ lại dữ liệu người dùng nhập
-            return "/categories/create";
+            model.addAttribute("book", book); // Giữ lại dữ liệu người dùng nhập
+            model.addAttribute("categories", categoryService.fetchAllCategories());
+            return "books/create"; // Trả về form tạo
         }
-        this.bookService.saveBook(book);
-        return "redirect:/books";
 
+        this.bookService.saveBook(book); // Lưu sách mới
+
+        // Chỉ cần redirect về trang danh sách sách mặc định
+        return "redirect:/books";
     }
 
     @GetMapping("books/edit/{id}")
@@ -133,58 +137,81 @@ public class BookController {
 
     @PostMapping("/books/edit")
     public String updateBook(@ModelAttribute("book") Book book, Model model,
-            @RequestParam("bookImage") MultipartFile file) {
-        Optional<Book> existingBook = bookService.fetchBookById(book.getId());
+            @RequestParam(value = "bookImages", required = false) List<MultipartFile> files) {
 
-        if (existingBook.isPresent() && existingBook.get().getId() != book.getId()) {
-            model.addAttribute("errors", "Đã tồn tại sách này rồi");
-            model.addAttribute("book", book); // giữ lại dữ liệu người dùng nhập
-            return "/books/edit";
+        Optional<Book> existingBookOpt = bookService.fetchBookById(book.getId());
+        if (existingBookOpt.isEmpty()) {
+            throw new RuntimeException("Book not found for update");
         }
+        Book realBook = existingBookOpt.get(); // <-- Sách thực tế từ DB
+
         try {
-            // Xử lý upload ảnh nếu có
-            if (file != null && !file.isEmpty()) {
-                String imageUrl = azureBlobService.uploadFile(file);
-                book.setImageUrl(imageUrl);
-            } else if (book.getId() != null) {
-                // Nếu là cập nhật và không có file mới, giữ nguyên ảnh cũ
-                Optional<Book> optionalBook = bookService.fetchBookById(book.getId());
-                if (optionalBook.isPresent()) {
-                    book.setImageUrl(optionalBook.get().getImageUrl());
+            List<String> updatedImageUrls = new ArrayList<>();
+
+            if (files != null && !files.isEmpty() && files.stream().anyMatch(f -> !f.isEmpty())) {
+                // Xóa tất cả ảnh cũ
+                if (realBook.getImageUrls() != null) {
+                    for (String oldUrl : realBook.getImageUrls()) {
+                        String oldBlobName = azureBlobService.getBlobNameFromUrl(oldUrl);
+                        if (oldBlobName != null) {
+                            azureBlobService.deleteFile(oldBlobName);
+                        }
+                    }
                 }
+                // Tải lên các file mới và thêm vào danh sách
+                for (MultipartFile file : files) {
+                    if (!file.isEmpty()) {
+                        String imageUrl = azureBlobService.uploadFile(file);
+                        updatedImageUrls.add(imageUrl); // <-- Đảm bảo mỗi URL được thêm vào danh sách
+                    }
+                }
+            } else {
+                // Nếu không có file mới, giữ lại ảnh cũ
+                updatedImageUrls = realBook.getImageUrls();
             }
+
+            // Gán danh sách URL đã cập nhật vào đối tượng sách thực tế
+            realBook.setImageUrls(updatedImageUrls); // <-- Dòng này phải gán đúng List
 
         } catch (IOException e) {
             e.printStackTrace();
-            return "redirect:/books";
+            model.addAttribute("errorMessage", "Lỗi khi tải lên ảnh: " + e.getMessage());
+            model.addAttribute("book", book);
+            model.addAttribute("categories", categoryService.fetchAllCategories());
+            return "/books/edit";
         }
 
-        Book realBook = existingBook.get();
-        realBook.setAuthorName(book.getAuthorName());
-        realBook.setBorrows(book.getBorrows());
-        realBook.setCategories(book.getCategories());
-        realBook.setPublishedDate(book.getPublishedDate());
+        // ... (logic kiểm tra tiêu đề và cập nhật các trường khác) ...
         realBook.setTitle(book.getTitle());
-        realBook.setImageUrl(book.getImageUrl());
-        bookService.saveBook(realBook); // phải gọi chỗ này
+        realBook.setAuthorName(book.getAuthorName());
+        realBook.setPublishedDate(book.getPublishedDate());
+        realBook.setCategories(book.getCategories()); // <-- Đảm bảo categories cũng được cập nhật đúng
+
+        bookService.saveBook(realBook); // <-- Lưu đối tượng realBook đã được cập nhật
         return "redirect:/books";
     }
 
     @PostMapping("books/delete/{id}")
-    public String deleteBook(@PathVariable("id") long id) {
+    public String deleteBook(@PathVariable("id") long id, Model model) {
         Optional<Book> optionalBook = this.bookService.fetchBookById(id);
-        if (this.bookService.fetchBookById(id).isEmpty()) {
-            throw new RuntimeException("book not found");
+        if (optionalBook.isEmpty()) {
+            throw new RuntimeException("Book not found");
         }
         Book book = optionalBook.get();
 
-        if (book.getImageUrl() != null && !book.getImageUrl().isEmpty()) {
-            String blobName = azureBlobService.getBlobNameFromUrl(book.getImageUrl());
-            if (blobName != null) {
-                azureBlobService.deleteFile(blobName);
+        // Xóa TẤT CẢ các ảnh liên quan đến sách từ Azure Blob Storage
+        if (book.getImageUrls() != null && !book.getImageUrls().isEmpty()) {
+            for (String imageUrl : book.getImageUrls()) {
+                String blobName = azureBlobService.getBlobNameFromUrl(imageUrl);
+                if (blobName != null) {
+                    azureBlobService.deleteFile(blobName);
+                }
             }
         }
+
         this.bookService.deleteById(id);
+
+        // Chỉ cần redirect về trang danh sách sách mặc định
         return "redirect:/books";
     }
 
@@ -192,20 +219,16 @@ public class BookController {
     public String showBookDetail(@PathVariable("id") long id, Model model, HttpServletRequest request) {
         Optional<Book> optionalBook = this.bookService.fetchBookById(id);
         if (optionalBook.isEmpty()) {
-            // Lấy URL của trang trước đó từ header Referer
             String referer = request.getHeader("Referer");
             if (referer != null && !referer.isEmpty()) {
-                // Nếu có referer, chuyển hướng về trang đó
                 return "redirect:" + referer;
             } else {
-                // Nếu không có referer (ví dụ: truy cập trực tiếp), chuyển hướng về trang danh
-                // sách sách mặc định
                 return "redirect:/books";
             }
         } else {
-            model.addAttribute("book", optionalBook.get()); // Đặt tên thuộc tính là "book" để khớp với template
+            model.addAttribute("book", optionalBook.get());
         }
-        return "books/detail"; // Đảm bảo tên view khớp với đường dẫn file HTML: templates/books/detail.html
+        return "books/detail";
     }
 
 }

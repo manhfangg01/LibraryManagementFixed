@@ -59,4 +59,8 @@ public class BookService {
         return this.bookRepository.findAll(spec, pageable);
     }
 
+    public long countAllBooks() {
+        return this.bookRepository.count();
+    }
+
 }
