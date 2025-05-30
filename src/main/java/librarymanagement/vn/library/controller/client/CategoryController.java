@@ -1,4 +1,4 @@
-package librarymanagement.vn.library.controller;
+package librarymanagement.vn.library.controller.client;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,13 +53,13 @@ public class CategoryController {
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
 
-        return "categories/show";
+        return "/client/categories/show";
     }
 
     @GetMapping("/categories/create")
     public String getCreateCategoryPage(Model model) {
         model.addAttribute("newCategory", new Category());
-        return "/categories/create";
+        return "/client/categories/create";
     }
 
     @PostMapping("/categories/create")
@@ -84,7 +84,7 @@ public class CategoryController {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         model.addAttribute("category", category);
         model.addAttribute("id", id);
-        return "/categories/edit";
+        return "/client/categories/edit";
     }
 
     // Xử lý cập nhật
@@ -118,7 +118,7 @@ public class CategoryController {
             return "redirect:/categories";
         }
         model.addAttribute("category", optionalCategory.get());
-        return "/categories/detail";
+        return "/client/categories/detail";
     }
 
 }

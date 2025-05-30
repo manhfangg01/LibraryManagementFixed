@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng nhập - Hệ thống Quản lý Thư viện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6; /* Màu nền nhẹ nhàng */
+        /* Thêm hiệu ứng nền gradient nhẹ */
+        background: linear-gradient(to right bottom, #e0f2fe, #bfdbfe);
+      }
+
+      /* Thêm hiệu ứng cho khối form chính */
+      .form-container {
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+      }
+
+      .form-container:hover {
+        transform: translateY(-5px); /* Nâng nhẹ lên khi hover */
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); /* Đổ bóng mạnh hơn */
+      }
+
+      /* Hiệu ứng cho input focus */
+      input:focus {
+        border-color: #3b82f6; /* Màu xanh khi focus */
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); /* Vòng sáng xanh */
+      }
+
+      /* Hiệu ứng cho nút */
+      button {
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        transition: all 0.3s ease;
+      }
+
+      button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+        z-index: -1;
+      }
+
+      button:hover::before {
+        left: 100%;
+      }
+
+      button:active {
+        transform: scale(0.98); /* Hiệu ứng nhấn nút */
+      }
+
+      /* Hiệu ứng cho các liên kết */
+      a {
+        transition: color 0.3s ease;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body class="flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4 form-container">
+      <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Đăng nhập</h2>
+
+      <div th:if="${param.registered}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <span class="block sm:inline">Bạn đã đăng ký thành công! Hãy đăng nhập.</span>
+      </div>
+
+      <div th:if="${param.error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <span class="block sm:inline">Email hoặc mật khẩu không hợp lệ.</span>
+      </div>
+
+      <div th:if="${param.logout}" class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <span class="block sm:inline">Bạn đã đăng xuất thành công.</span>
+      </div>
+
+      <form th:action="@{/login}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        <div class="mb-4">
+          <label for="username" class="block text-gray-700 text-sm font-medium mb-2">Email:</label>
+          <input
+            type="email"
+            id="username"
+            name="username"
+            class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Nhập địa chỉ email của bạn"
+            required
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="password" class="block text-gray-700 text-sm font-medium mb-2">Mật khẩu:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Nhập mật khẩu của bạn"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out"
+        >
+          Đăng nhập
+        </button>
+      </form>
+
+      <div class="flex justify-between items-center mt-6 text-sm">
+        <a th:href="@{/register}" class="text-blue-600 hover:text-blue-800 font-medium">Đăng ký tài khoản mới</a>
+        <a th:href="@{/forgot-password}" class="text-gray-600 hover:text-gray-800">Quên mật khẩu?</a>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-package librarymanagement.vn.library.controller;
+package librarymanagement.vn.library.controller.client;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,14 +73,14 @@ public class BookController {
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
 
-        return "books/show";
+        return "/client/books/show";
     }
 
     @GetMapping("/books/create")
     public String showCreateForm(Model model) {
         model.addAttribute("book", new Book());
         model.addAttribute("categories", categoryService.fetchAllCategories());
-        return "books/create";
+        return "/client/books/create";
     }
 
     @PostMapping("/books")
@@ -106,7 +106,7 @@ public class BookController {
             model.addAttribute("errorMessage", "Lỗi khi tải lên ảnh: " + e.getMessage());
             model.addAttribute("book", book); // Giữ lại dữ liệu người dùng nhập
             model.addAttribute("categories", categoryService.fetchAllCategories());
-            return "books/create"; // Trả về form tạo
+            return "client/books/create"; // Trả về form tạo
         }
 
         // Kiểm tra trùng lặp tiêu đề cho sách MỚI
@@ -114,7 +114,7 @@ public class BookController {
             model.addAttribute("ObjectExisted", "Đã tồn tại sách này rồi");
             model.addAttribute("book", book); // Giữ lại dữ liệu người dùng nhập
             model.addAttribute("categories", categoryService.fetchAllCategories());
-            return "books/create"; // Trả về form tạo
+            return "client/books/create"; // Trả về form tạo
         }
 
         this.bookService.saveBook(book); // Lưu sách mới
@@ -132,7 +132,7 @@ public class BookController {
 
         // Sửa chỗ này: truyền toàn bộ categories có sẵn
         model.addAttribute("categories", categoryService.fetchAllCategories());
-        return "/books/edit";
+        return "/client/books/edit";
     }
 
     @PostMapping("/books/edit")
@@ -178,7 +178,7 @@ public class BookController {
             model.addAttribute("errorMessage", "Lỗi khi tải lên ảnh: " + e.getMessage());
             model.addAttribute("book", book);
             model.addAttribute("categories", categoryService.fetchAllCategories());
-            return "/books/edit";
+            return "/client/books/edit";
         }
 
         // ... (logic kiểm tra tiêu đề và cập nhật các trường khác) ...
@@ -228,7 +228,7 @@ public class BookController {
         } else {
             model.addAttribute("book", optionalBook.get());
         }
-        return "books/detail";
+        return "client/books/detail";
     }
 
 }

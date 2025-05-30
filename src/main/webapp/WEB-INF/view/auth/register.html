@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký - Hệ thống Quản lý Thư viện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6; /* Màu nền nhẹ nhàng */
+      }
+    </style>
+  </head>
+  <body class="flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-4">
+      <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Đăng ký Tài khoản</h2>
+
+      <form th:action="@{/register}" th:object="${user}" method="post" id="registrationForm">
+        <div class="mb-4">
+          <label for="username" class="block text-gray-700 text-sm font-medium mb-2">Tên người dùng:</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            th:field="*{username}"
+            class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Nhập tên người dùng của bạn"
+            required
+            minlength="3"
+          />
+          <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="text-red-500 text-xs mt-1"></p>
+        </div>
+
+        <div class="mb-4">
+          <label for="email" class="block text-gray-700 text-sm font-medium mb-2">Email:</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            th:field="*{email}"
+            class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Nhập địa chỉ email của bạn"
+            required
+          />
+          <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-500 text-xs mt-1"></p>
+        </div>
+
+        <div class="mb-4">
+          <label for="age" class="block text-gray-700 text-sm font-medium mb-2">Tuổi:</label>
+          <input
+            type="number"
+            id="age"
+            name="age"
+            th:field="*{age}"
+            class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Nhập tuổi của bạn"
+          />
+          <p th:if="${#fields.hasErrors('age')}" th:errors="*{age}" class="text-red-500 text-xs mt-1"></p>
+        </div>
+
+        <div class="mb-4">
+          <label for="address" class="block text-gray-700 text-sm font-medium mb-2">Địa chỉ:</label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            th:field="*{address}"
+            class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Nhập địa chỉ của bạn"
+          />
+          <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="text-red-500 text-xs mt-1"></p>
+        </div>
+
+        <div class="mb-4">
+          <label for="password" class="block text-gray-700 text-sm font-medium mb-2">Mật khẩu:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            th:field="*{password}"
+            class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Nhập mật khẩu của bạn"
+            required
+            minlength="3"
+          />
+          <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-red-500 text-xs mt-1"></p>
+        </div>
+
+        <div class="mb-6">
+          <label for="confirmPassword" class="block text-gray-700 text-sm font-medium mb-2">Xác nhận mật khẩu:</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            th:field="*{confirmPassword}"
+            class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Xác nhận mật khẩu của bạn"
+            required
+          />
+          <p id="confirmPasswordError" class="text-red-500 text-xs mt-1" style="display: none"></p>
+          <p th:if="${passwordMismatchError}" class="text-red-500 text-xs mt-1" th:text="${passwordMismatchError}"></p>
+          <p th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="text-red-500 text-xs mt-1"></p>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out"
+        >
+          Đăng ký
+        </button>
+      </form>
+
+      <p class="text-center text-gray-600 text-sm mt-6">Đã có tài khoản? <a th:href="@{/login}" class="text-blue-600 hover:text-blue-800 font-medium">Đăng nhập ngay</a></p>
+    </div>
+
+    <script>
+      document.getElementById("registrationForm").addEventListener("submit", function (event) {
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const confirmPasswordError = document.getElementById("confirmPasswordError");
+
+        if (password !== confirmPassword) {
+          confirmPasswordError.textContent = "Mật khẩu và xác nhận mật khẩu không khớp.";
+          confirmPasswordError.style.display = "block";
+          event.preventDefault(); // Ngăn form gửi đi
+        } else {
+          confirmPasswordError.style.display = "none";
+        }
+      });
+    </script>
+  </body>
+</html>

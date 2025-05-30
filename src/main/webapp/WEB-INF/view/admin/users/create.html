@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thêm Người dùng mới - Hệ thống Quản lý Thư viện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6;
+        background: linear-gradient(to right bottom, #e0f2fe, #bfdbfe);
+      }
+      .sidebar {
+        transition: width 0.3s ease-in-out;
+        position: fixed; /* Giữ sidebar cố định */
+        height: 100%;
+        z-index: 10;
+      }
+      .sidebar:hover {
+        width: 250px; /* Mở rộng sidebar khi hover trên desktop */
+      }
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 0; /* Ẩn sidebar trên mobile */
+          overflow: hidden;
+        }
+        .sidebar.open {
+          width: 250px; /* Mở sidebar khi có class 'open' */
+        }
+        /* main content on mobile will not have margin-left, it will be handled by JS */
+      }
+      /* Style cho form inputs - Đảm bảo border được áp dụng */
+      input[type="text"],
+      input[type="email"],
+      input[type="number"],
+      input[type="file"],
+      select {
+        @apply shadow-sm appearance-none rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        /* Đã thêm border trực tiếp vào HTML, nên có thể bỏ @apply border ở đây nếu muốn */
+      }
+      label {
+        @apply block text-gray-700 text-sm font-medium mb-1;
+      }
+    </style>
+  </head>
+  <body class="flex min-h-screen">
+    <aside class="sidebar bg-gray-800 text-white w-64 p-4 space-y-6 flex-shrink-0 md:w-64">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Admin Panel</h1>
+        <button id="sidebarToggle" class="md:hidden text-white focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a th:href="@{/admin/dashboard}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l7 7m-10-7v10a1 1 0 001 1h3m-6 0h6"></path>
+              </svg>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/users}" class="flex items-center space-x-2 p-2 rounded-md bg-gray-700 text-blue-300 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.107-1.284-.304-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.107-1.284.304-1.857m0 0A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093m0 0a7.962 7.962 0 014.794 1.964m-4.794-1.964A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093m-2.412 0A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093M12 14a7.962 7.962 0 014.794 1.964m-4.794-1.964A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093"
+                ></path>
+              </svg>
+              <span>Quản lý Người dùng</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/books}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6.253v13m0-13C10.832 5.477 9.205 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.795 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.795 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.205 18 16.5 18s-3.332.477-4.5 1.253"
+                ></path>
+              </svg>
+              <span>Quản lý Sách</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/borrowings}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h6a2 2 0 012 2v10a2 2 0 01-2 2h-6a2 2 0 00-2-2v-2m0-7H5a2 2 0 00-2 2v4m0 0h3m-3 0h3m-3 0V9m8 4H9m7 4h-6"
+                ></path>
+              </svg>
+              <span>Quản lý Mượn/Trả</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/settings}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                ></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>Cài đặt</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="absolute bottom-4 left-4 right-4 flex justify-center">
+        <form th:action="@{/logout}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button
+            type="submit"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-300 ease-in-out"
+          >
+            Đăng xuất
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="flex-1 p-8 md:ml-64 overflow-auto">
+      <button id="mobileSidebarToggle" class="md:hidden bg-gray-800 text-white p-2 rounded-md mb-4 focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
+      <header class="bg-white p-6 rounded-lg shadow-md mb-8 flex justify-between items-center">
+        <h1 class="text-3xl font-semibold text-gray-800">Thêm Người dùng mới</h1>
+        <a
+          th:href="@{/admin/dashboard}"
+          class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300 ease-in-out"
+        >
+          Trở về Dashboard
+        </a>
+      </header>
+
+      <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+        <form th:action="@{/admin/users/create}" th:object="${user}" method="post" enctype="multipart/form-data">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="username">Tên người dùng:</label>
+              <input type="text" id="username" th:field="*{username}" required class="border border-gray-300" />
+            </div>
+            <div>
+              <label for="email">Email:</label>
+              <input type="email" id="email" th:field="*{email}" required class="border border-gray-300" />
+            </div>
+            <div>
+              <label for="password">Mật khẩu:</label>
+              <input type="password" id="password" th:field="*{password}" required class="border border-gray-300" />
+            </div>
+            <div>
+              <label for="age">Tuổi:</label>
+              <input type="number" id="age" th:field="*{age}" min="0" max="150" class="border border-gray-300" />
+            </div>
+            <div class="md:col-span-2">
+              <label for="address">Địa chỉ:</label>
+              <input type="text" id="address" th:field="*{address}" class="border border-gray-300" />
+            </div>
+            <div>
+              <label for="profileImage">Ảnh đại diện:</label>
+              <input type="file" id="profileImage" name="profileImage" accept="image/*" /><br />
+            </div>
+            <div>
+              <label for="role">Vai trò:</label>
+              <select name="role">
+                <option value="">Loại người dùng</option>
+                <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex justify-end space-x-4 mt-8">
+            <a
+              th:href="@{/admin/users}"
+              class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300 ease-in-out"
+            >
+              Hủy
+            </a>
+            <button
+              type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out"
+            >
+              Thêm Người dùng
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      // JavaScript cho chức năng đóng/mở sidebar trên mobile
+      const sidebar = document.querySelector(".sidebar");
+      const sidebarToggle = document.getElementById("sidebarToggle");
+      const mobileSidebarToggle = document.getElementById("mobileSidebarToggle");
+
+      // Hàm để đóng sidebar
+      function closeSidebar() {
+        sidebar.classList.remove("open");
+      }
+
+      // Hàm để mở sidebar
+      function openSidebar() {
+        sidebar.classList.add("open");
+      }
+
+      // Bắt sự kiện click cho nút đóng sidebar (trong sidebar)
+      sidebarToggle.addEventListener("click", closeSidebar);
+
+      // Bắt sự kiện click cho nút mở sidebar (trong main content)
+      mobileSidebarToggle.addEventListener("click", openSidebar);
+
+      // Đóng sidebar khi click ra ngoài trên mobile
+      document.addEventListener("click", (event) => {
+        if (window.innerWidth <= 768 && !sidebar.contains(event.target) && !mobileSidebarToggle.contains(event.target) && sidebar.classList.contains("open")) {
+          closeSidebar();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-package librarymanagement.vn.library.controller;
+package librarymanagement.vn.library.controller.client;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,7 +66,7 @@ public class BorrowController {
         // Truyền tất cả các giá trị của enum BorrowStatus để populate dropdown
         model.addAttribute("allBorrowStatuses", Arrays.asList(BorrowStatus.values()));
 
-        return "/borrows/show";
+        return "/client/borrows/show";
     }
 
     @GetMapping("/borrows/create")
@@ -75,7 +75,7 @@ public class BorrowController {
         model.addAttribute("books", this.bookService.fetchAllBooks());
         model.addAttribute("members", this.memberService.fetchAllMember());
         model.addAttribute("librarians", this.librarianService.fetchAllLibrarian());
-        return "borrows/create";
+        return "/client/borrows/create";
     }
 
     @PostMapping("/borrows/create")
@@ -96,7 +96,7 @@ public class BorrowController {
         model.addAttribute("books", this.bookService.fetchAllBooks());
         model.addAttribute("members", this.memberService.fetchAllMember());
         model.addAttribute("librarians", this.librarianService.fetchAllLibrarian());
-        return "borrows/edit";
+        return "/client/borrows/edit";
     }
 
     @PostMapping("/borrows/edit")

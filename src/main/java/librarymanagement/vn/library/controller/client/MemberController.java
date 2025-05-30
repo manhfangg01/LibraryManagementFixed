@@ -1,4 +1,4 @@
-package librarymanagement.vn.library.controller;
+package librarymanagement.vn.library.controller.client;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
 import librarymanagement.vn.library.domain.dto.MemberFilterCriteriaDTO;
-import librarymanagement.vn.library.domain.model.Member;
 import librarymanagement.vn.library.domain.model.Member;
 import librarymanagement.vn.library.domain.service.MemberService;
 import librarymanagement.vn.library.domain.service.azure.AzureBlobService;
@@ -69,7 +68,7 @@ public class MemberController {
         // Rất quan trọng: truyền DTO trở lại view để giữ giá trị trong form
         model.addAttribute("memberFilterCriteriaDTO", memberFilterCriteriaDTO);
 
-        return "members/show"; // trang hiển thị danh sách members
+        return "/client/members/show"; // trang hiển thị danh sách members
     }
 
     @GetMapping("/members/create")
@@ -77,12 +76,13 @@ public class MemberController {
         model.addAttribute("allMembershipTypes", Arrays.asList(MembershipType.values()));
 
         model.addAttribute("member", new Member());
-        return "/members/create";
+        return "/client/members/create";
     }
 
     @PostMapping("/members/create")
     public String postMethodName(@ModelAttribute("member") Member member,
-            @RequestParam("profileImage") MultipartFile file, Model model) {
+            @RequestParam("profileImage") MultipartFile file, Model model) { // Lưu ý là đừng có đặt trùng tên với
+                                                                             // trường String (Url của ảnh )
         model.addAttribute("allMembershipTypes", Arrays.asList(MembershipType.values()));
         try {
             // Xử lý upload ảnh nếu có
@@ -113,7 +113,7 @@ public class MemberController {
         }
         model.addAttribute("allMembershipTypes", Arrays.asList(MembershipType.values()));
         model.addAttribute("member", optionalMember.get());
-        return "/members/edit";
+        return "/client/members/edit";
     }
 
     @PostMapping("/members/edit")
@@ -167,7 +167,7 @@ public class MemberController {
             System.out.println("gay");
         }
         model.addAttribute("member", optionalMember.get());
-        return "/members/detail";
+        return "/client/members/detail";
     }
 
 }

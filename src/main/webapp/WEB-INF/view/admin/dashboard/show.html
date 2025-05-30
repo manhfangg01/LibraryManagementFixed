@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trang Quản trị - Hệ thống Quản lý Thư viện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6;
+        background: linear-gradient(to right bottom, #e0f2fe, #bfdbfe); /* Nền gradient nhẹ */
+      }
+      .sidebar {
+        width: 250px; /* Default width for desktop */
+        transition: transform 0.3s ease-in-out; /* Use transform for smoother animation */
+        position: fixed; /* Keep sidebar fixed */
+        height: 100%;
+        z-index: 10;
+        transform: translateX(0); /* Ensure sidebar is visible by default on desktop */
+      }
+      @media (min-width: 769px) {
+        /* On desktop, keep sidebar open and main content shifted */
+        .main-content {
+          margin-left: 250px;
+        }
+      }
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 250px; /* Set a consistent width for the hidden sidebar on mobile */
+          transform: translateX(-100%); /* Hide sidebar by default on mobile */
+        }
+        .sidebar.open {
+          transform: translateX(0); /* Show sidebar when 'open' class is added */
+        }
+        .main-content {
+          margin-left: 0; /* No margin on mobile */
+        }
+      }
+    </style>
+  </head>
+  <body class="flex min-h-screen">
+    <aside class="sidebar bg-gray-800 text-white p-4 space-y-6 flex-shrink-0">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Admin Panel</h1>
+        <button id="sidebarToggle" class="md:hidden text-white focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a th:href="@{/admin/dashboard}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l7 7m-10-7v10a1 1 0 001 1h3m-6 0h6"></path>
+              </svg>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/users}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.107-1.284-.304-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.107-1.284.304-1.857m0 0A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093m0 0a7.962 7.962 0 014.794 1.964m-4.794-1.964A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093m-2.412 0A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093M12 14a7.962 7.962 0 014.794 1.964m-4.794-1.964A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093"
+                ></path>
+              </svg>
+              <span>Quản lý Người dùng</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/books}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6.253v13m0-13C10.832 5.477 9.205 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.795 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.795 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.205 18 16.5 18s-3.332.477-4.5 1.253"
+                ></path>
+              </svg>
+              <span>Quản lý Sách</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/borrowings}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h6a2 2 0 012 2v10a2 2 0 01-2 2h-6a2 2 0 00-2-2v-2m0-7H5a2 2 0 00-2 2v4m0 0h3m-3 0h3m-3 0V9m8 4H9m7 4h-6"
+                ></path>
+              </svg>
+              <span>Quản lý Mượn/Trả</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/settings}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                ></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>Cài đặt</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="absolute bottom-4 left-4 right-4 flex justify-center">
+        <form th:action="@{/logout}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button
+            type="submit"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-300 ease-in-out"
+          >
+            Đăng xuất
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main-content flex-1 p-8 overflow-auto">
+      <button id="mobileSidebarToggle" class="md:hidden bg-gray-800 text-white p-2 rounded-md mb-4 focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
+      <header class="bg-white p-6 rounded-lg shadow-md mb-8 flex justify-between items-center">
+        <h1 class="text-3xl font-semibold text-gray-800">Dashboard Quản trị</h1>
+        <div class="text-lg text-gray-700">Chào mừng, <span class="font-bold" sec:authentication="name">Admin</span>!</div>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">Tổng số Người dùng</h3>
+          <p class="text-4xl font-bold text-blue-600">1234</p>
+          <p class="text-gray-500 mt-2">Người dùng đã đăng ký</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">Tổng số Sách</h3>
+          <p class="text-4xl font-bold text-green-600">5678</p>
+          <p class="text-gray-500 mt-2">Sách có sẵn trong thư viện</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+          <h3 class="text-xl font-semibold text-gray-700 mb-2">Sách đang được Mượn</h3>
+          <p class="text-4xl font-bold text-yellow-600">901</p>
+          <p class="text-gray-500 mt-2">Lượt mượn hiện tại</p>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Hoạt động gần đây</h3>
+        <ul class="space-y-3">
+          <li class="flex items-center space-x-3 text-gray-600">
+            <span class="text-green-500 font-bold">✓</span>
+            <span>Người dùng <span class="font-medium">Nguyễn Văn A</span> đã đăng ký tài khoản mới.</span>
+            <span class="text-xs text-gray-400 ml-auto">10 phút trước</span>
+          </li>
+          <li class="flex items-center space-x-3 text-gray-600">
+            <span class="text-blue-500 font-bold">↑</span>
+            <span>Sách <span class="font-medium">"Lập trình Java cơ bản"</span> đã được thêm vào hệ thống.</span>
+            <span class="text-xs text-gray-400 ml-auto">1 giờ trước</span>
+          </li>
+          <li class="flex items-center space-x-3 text-gray-600">
+            <span class="text-yellow-500 font-bold">↔</span>
+            <span>Người dùng <span class="font-medium">Trần Thị B</span> đã mượn sách <span class="font-medium">"Cấu trúc dữ liệu và giải thuật"</span>.</span>
+            <span class="text-xs text-gray-400 ml-auto">3 giờ trước</span>
+          </li>
+          <li class="flex items-center space-x-3 text-gray-600">
+            <span class="text-red-500 font-bold">✗</span>
+            <span>Sách <span class="font-medium">"Toán cao cấp"</span> đã bị xóa khỏi hệ thống.</span>
+            <span class="text-xs text-gray-400 ml-auto">Hôm qua</span>
+          </li>
+        </ul>
+      </div>
+    </main>
+
+    <script>
+      // JavaScript cho chức năng đóng/mở sidebar trên mobile
+      const sidebar = document.querySelector(".sidebar");
+      const sidebarToggle = document.getElementById("sidebarToggle"); // This is the 'X' button inside the sidebar
+      const mobileSidebarToggle = document.getElementById("mobileSidebarToggle"); // This is the hamburger icon outside the sidebar
+      const mainContent = document.querySelector(".main-content");
+
+      // Function to close the sidebar
+      function closeSidebar() {
+        sidebar.classList.remove("open");
+      }
+
+      // Function to open the sidebar
+      function openSidebar() {
+        sidebar.classList.add("open");
+      }
+
+      // Toggle sidebar when 'X' button is clicked (inside sidebar)
+      sidebarToggle.addEventListener("click", () => {
+        closeSidebar();
+      });
+
+      // Toggle sidebar when hamburger icon is clicked (outside sidebar)
+      mobileSidebarToggle.addEventListener("click", () => {
+        openSidebar();
+      });
+
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener("click", (event) => {
+        // Check if the screen is mobile size (max-width: 768px)
+        // And if the click is outside the sidebar AND not on the mobile toggle button
+        // And if the sidebar is currently open
+        if (window.innerWidth <= 768 && !sidebar.contains(event.target) && !mobileSidebarToggle.contains(event.target) && sidebar.classList.contains("open")) {
+          closeSidebar();
+        }
+      });
+    </script>
+  </body>
+</html>

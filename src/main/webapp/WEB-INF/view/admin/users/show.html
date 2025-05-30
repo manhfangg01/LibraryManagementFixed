@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý Người dùng - Hệ thống Quản lý Thư viện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6;
+        background: linear-gradient(to right bottom, #e0f2fe, #bfdbfe);
+      }
+      .sidebar {
+        transition: width 0.3s ease-in-out;
+        position: fixed; /* Giữ sidebar cố định */
+        height: 100%;
+        z-index: 10;
+      }
+      .sidebar:hover {
+        width: 250px; /* Mở rộng sidebar khi hover trên desktop */
+      }
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 0; /* Ẩn sidebar trên mobile */
+          overflow: hidden;
+        }
+        .sidebar.open {
+          width: 250px; /* Mở sidebar khi có class 'open' */
+        }
+        /* main content on mobile will not have margin-left, it will be handled by JS */
+      }
+      /* Style cho table */
+      th,
+      td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0; /* gray-200 */
+      }
+      th {
+        background-color: #f8fafc; /* gray-50 */
+        font-weight: 600;
+        color: #4a5568; /* gray-700 */
+      }
+      tr:hover {
+        background-color: #f0f4f8; /* gray-100 */
+      }
+    </style>
+  </head>
+  <body class="flex min-h-screen">
+    <aside class="sidebar bg-gray-800 text-white w-64 p-4 space-y-6 flex-shrink-0 md:w-64">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Admin Panel</h1>
+        <button id="sidebarToggle" class="md:hidden text-white focus:outline-none">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a th:href="@{/admin/dashboard}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m0 0l7 7m-10-7v10a1 1 0 001 1h3m-6 0h6"></path>
+              </svg>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/users}" class="flex items-center space-x-2 p-2 rounded-md bg-gray-700 text-blue-300 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.107-1.284-.304-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.107-1.284.304-1.857m0 0A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093m0 0a7.962 7.962 0 014.794 1.964m-4.794-1.964A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093m-2.412 0A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093M12 14a7.962 7.962 0 014.794 1.964m-4.794-1.964A7.962 7.962 0 0112 14c.407 0 .81-.03 1.206-.093"
+                ></path>
+              </svg>
+              <span>Quản lý Người dùng</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/books}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6.253v13m0-13C10.832 5.477 9.205 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.795 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.795 5 16.5 5s3.332.477 4.5 1.253v13C19.832 18.477 18.205 18 16.5 18s-3.332.477-4.5 1.253"
+                ></path>
+              </svg>
+              <span>Quản lý Sách</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/borrowings}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h6a2 2 0 012 2v10a2 2 0 01-2 2h-6a2 2 0 00-2-2v-2m0-7H5a2 2 0 00-2 2v4m0 0h3m-3 0h3m-3 0V9m8 4H9m7 4h-6"
+                ></path>
+              </svg>
+              <span>Quản lý Mượn/Trả</span>
+            </a>
+          </li>
+          <li>
+            <a th:href="@{/admin/settings}" class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-700 transition duration-200">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                ></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span>Cài đặt</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="absolute bottom-4 left-4 right-4 flex justify-center">
+        <form th:action="@{/logout}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <button
+            type="submit"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition duration-300 ease-in-out"
+          >
+            Đăng xuất
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="flex-1 p-8 md:ml-64 overflow-auto">
+      <button id="mobileSidebarToggle" class="md:hidden bg-gray-800 text-white p-2 rounded-md mb-4 focus:outline-none">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
+      <header class="bg-white p-6 rounded-lg shadow-md mb-8 flex justify-between items-center">
+        <h1 class="text-3xl font-semibold text-gray-800">Quản lý Người dùng</h1>
+        <div class="text-lg text-gray-700">Chào mừng, <span class="font-bold" sec:authentication="name">Admin</span>!</div>
+      </header>
+
+      <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h3 class="text-xl font-semibold text-gray-700 mb-4">Lọc Người dùng</h3>
+        <form th:action="@{/admin/users}" method="get" th:object="${userFilterDTO}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="col-span-1">
+            <label for="filterUsername" class="block text-gray-700 text-sm font-medium mb-1">Tên người dùng:</label>
+            <input
+              type="text"
+              id="filterUsername"
+              name="username"
+              th:field="*{username}"
+              class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tìm theo tên người dùng"
+            />
+          </div>
+          <div class="col-span-1">
+            <label for="filterEmail" class="block text-gray-700 text-sm font-medium mb-1">Email:</label>
+            <input
+              type="email"
+              id="filterEmail"
+              name="email"
+              th:field="*{email}"
+              class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tìm theo email"
+            />
+          </div>
+          <div class="col-span-1">
+            <label for="filterAge" class="block text-gray-700 text-sm font-medium mb-1">Tuổi:</label>
+            <input
+              type="number"
+              id="filterAge"
+              name="age"
+              th:field="*{age}"
+              class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tìm theo tuổi"
+            />
+          </div>
+          <div class="col-span-1">
+            <label for="filterAddress" class="block text-gray-700 text-sm font-medium mb-1">Địa chỉ:</label>
+            <input
+              type="text"
+              id="filterAddress"
+              name="address"
+              th:field="*{address}"
+              class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Tìm theo địa chỉ"
+            />
+          </div>
+          <div class="col-span-1">
+            <label for="filterRole" class="block text-gray-700 text-sm font-medium mb-1">Vai trò:</label>
+            <select
+              id="filterRole"
+              name="role"
+              th:field="*{role}"
+              class="shadow-sm appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">-- Chọn vai trò --</option>
+              <option th:each="r : ${allRoles}" th:value="${r.name}" th:text="${r.name}"></option>
+            </select>
+          </div>
+          <div class="col-span-1 md:col-span-2 lg:col-span-3 flex items-end justify-end space-x-2">
+            <button
+              type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out"
+            >
+              Tìm kiếm
+            </button>
+            <a
+              th:href="@{/admin/users}"
+              class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-300 ease-in-out"
+            >
+              Đặt lại
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-md mb-8 overflow-x-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold text-gray-700">Danh sách Người dùng</h3>
+          <a
+            th:href="@{/admin/users/create}"
+            class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300 ease-in-out"
+          >
+            Thêm Người dùng mới
+          </a>
+        </div>
+        <table class="min-w-full table-auto">
+          <thead>
+            <tr>
+              <th
+                class="cursor-pointer"
+                th:onclick="|location.href='@{/admin/users(page=${currentPage}, size=${sizePerPage}, sortBy='id', sortDir=${(sortBy == 'id' and sortDir == 'ASC') ? 'DESC' : 'ASC'}, username=${userFilterDTO.username}, email=${userFilterDTO.email}, age=${userFilterDTO.age}, address=${userFilterDTO.address}, role=${userFilterDTO.role != null ? userFilterDTO.role.name : ''})}'|"
+              >
+                ID
+                <span th:if="${sortBy == 'id'}" th:text="${sortDir == 'ASC' ? '▲' : '▼'}"></span>
+              </th>
+              <th
+                class="cursor-pointer"
+                th:onclick="|location.href='@{/admin/users(page=${currentPage}, size=${sizePerPage}, sortBy='username', sortDir=${(sortBy == 'username' and sortDir == 'ASC') ? 'DESC' : 'ASC'}, username=${userFilterDTO.username}, email=${userFilterDTO.email}, age=${userFilterDTO.age}, address=${userFilterDTO.address}, role=${userFilterDTO.role != null ? userFilterDTO.role.name : ''})}'|"
+              >
+                Tên người dùng
+                <span th:if="${sortBy == 'username'}" th:text="${sortDir == 'username' ? '▲' : '▼'}"></span>
+              </th>
+              <th
+                class="cursor-pointer"
+                th:onclick="|location.href='@{/admin/users(page=${currentPage}, size=${sizePerPage}, sortBy='email', sortDir=${(sortBy == 'email' and sortDir == 'ASC') ? 'DESC' : 'ASC'}, username=${userFilterDTO.username}, email=${userFilterDTO.email}, age=${userFilterDTO.age}, address=${userFilterDTO.address}, role=${userFilterDTO.role != null ? userFilterDTO.role.name : ''})}'|"
+              >
+                Email
+                <span th:if="${sortBy == 'email'}" th:text="${sortDir == 'email' ? '▲' : '▼'}"></span>
+              </th>
+              <th
+                class="cursor-pointer"
+                th:onclick="|location.href='@{/admin/users(page=${currentPage}, size=${sizePerPage}, sortBy='age', sortDir=${(sortBy == 'age' and sortDir == 'ASC') ? 'DESC' : 'ASC'}, username=${userFilterDTO.username}, email=${userFilterDTO.email}, age=${userFilterDTO.age}, address=${userFilterDTO.address}, role=${userFilterDTO.role != null ? userFilterDTO.role.name : ''})}'|"
+              >
+                Tuổi
+                <span th:if="${sortBy == 'age'}" th:text="${sortDir == 'age' ? '▲' : '▼'}"></span>
+              </th>
+              <th
+                class="cursor-pointer"
+                th:onclick="|location.href='@{/admin/users(page=${currentPage}, size=${sizePerPage}, sortBy='address', sortDir=${(sortBy == 'address' and sortDir == 'ASC') ? 'DESC' : 'ASC'}, username=${userFilterDTO.username}, email=${userFilterDTO.email}, age=${userFilterDTO.age}, address=${userFilterDTO.address}, role=${userFilterDTO.role != null ? userFilterDTO.role.name : ''})}'|"
+              >
+                Địa chỉ
+                <span th:if="${sortBy == 'address'}" th:text="${sortDir == 'address' ? '▲' : '▼'}"></span>
+              </th>
+              <th>Vai trò</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="user : ${users}">
+              <td th:text="${user.id}">1</td>
+              <td th:text="${user.username}">nguyenvana</td>
+              <td th:text="${user.email}">vana@example.com</td>
+              <td th:text="${user.age}">30</td>
+              <td th:text="${user.address}">Hà Nội</td>
+              <td>
+                <span th:each="role, iterStat : ${user.role}"> <span th:text="${role.name}">USER</span><span th:if="${!iterStat.last}">, </span> </span>
+              </td>
+              <td class="whitespace-nowrap">
+                <a th:href="@{/admin/users/detail/{id}(id=${user.id})}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-200"> Chi tiết </a>
+                <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md ml-2 transition duration-200"> Sửa </a>
+                <form th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post" class="inline-block ml-2 delete-form">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                  <button type="button" th:data-user-id="${user.id}" class="delete-user-btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition duration-200">Xóa</button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${users.isEmpty()}">
+              <td colspan="7" class="text-center py-4 text-gray-500">Không tìm thấy người dùng nào.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <nav th:if="${totalPages > 0}" class="flex justify-center items-center space-x-2 mt-8">
+        <a
+          th:href="@{/admin/users(page=${currentPage - 1}, size=${sizePerPage}, sortBy=${sortBy}, sortDir=${sortDir}, username=${userFilterDTO.username}, email=${userFilterDTO.email}, age=${userFilterDTO.age}, address=${userFilterDTO.address}, role=${userFilterDTO.role != null ? userFilterDTO.role.name : ''})}"
+          th:classappend="${currentPage == 0} ? 'opacity-50 cursor-not-allowed' : ''"
+          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-200"
+        >
+          Trước
+        </a>
+
+        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+          <a
+            th:href="@{/admin/users(page=${i}, size=${sizePerPage}, sortBy=${sortBy}, sortDir=${sortDir}, username=${userFilterDTO.username}, email=${userFilterDTO.email}, age=${userFilterDTO.age}, address=${userFilterDTO.address}, role=${userFilterDTO.role != null ? userFilterDTO.role.name : ''})}"
+            th:text="${i + 1}"
+            th:classappend="${i == currentPage} ? 'bg-blue-700 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'"
+            class="font-bold py-2 px-4 rounded-md transition duration-200"
+          >
+          </a>
+        </th:block>
+
+        <a
+          th:href="@{/admin/users(page=${currentPage + 1}, size=${sizePerPage}, sortBy=${sortBy}, sortDir=${sortDir}, username=${userFilterDTO.username}, email=${userFilterDTO.email}, age=${userFilterDTO.age}, address=${userFilterDTO.address}, role=${userFilterDTO.role != null ? userFilterDTO.role.name : ''})}"
+          th:classappend="${currentPage == totalPages - 1} ? 'opacity-50 cursor-not-allowed' : ''"
+          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition duration-200"
+        >
+          Sau
+        </a>
+      </nav>
+
+      <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm">
+          <h3 class="text-lg font-semibold text-gray-800 mb-4">Xác nhận xóa</h3>
+          <p class="text-gray-700 mb-6">Bạn có chắc chắn muốn xóa người dùng này không?</p>
+          <div class="flex justify-end space-x-3">
+            <button id="cancelDeleteBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md">Hủy</button>
+            <button id="confirmDeleteBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md">Xóa</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // JavaScript cho chức năng đóng/mở sidebar trên mobile
+      const sidebar = document.querySelector(".sidebar");
+      const sidebarToggle = document.getElementById("sidebarToggle");
+      const mobileSidebarToggle = document.getElementById("mobileSidebarToggle");
+
+      // Hàm để đóng sidebar
+      function closeSidebar() {
+        sidebar.classList.remove("open");
+      }
+
+      // Hàm để mở sidebar
+      function openSidebar() {
+        sidebar.classList.add("open");
+      }
+
+      // Bắt sự kiện click cho nút đóng sidebar (trong sidebar)
+      sidebarToggle.addEventListener("click", closeSidebar);
+
+      // Bắt sự kiện click cho nút mở sidebar (trong main content)
+      mobileSidebarToggle.addEventListener("click", openSidebar);
+
+      // Đóng sidebar khi click ra ngoài trên mobile
+      document.addEventListener("click", (event) => {
+        if (window.innerWidth <= 768 && !sidebar.contains(event.target) && !mobileSidebarToggle.contains(event.target) && sidebar.classList.contains("open")) {
+          closeSidebar();
+        }
+      });
+
+      // JavaScript cho Modal xác nhận xóa
+      const deleteButtons = document.querySelectorAll(".delete-user-btn");
+      const deleteModal = document.getElementById("deleteModal");
+      const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+      const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+      let formToSubmit = null; // Biến để lưu trữ form cần submit
+
+      deleteButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          // Lấy form cha của nút "Xóa" được click
+          formToSubmit = event.target.closest("form.delete-form");
+          deleteModal.classList.remove("hidden");
+          deleteModal.classList.add("flex"); // Hiển thị modal
+        });
+      });
+
+      cancelDeleteBtn.addEventListener("click", () => {
+        deleteModal.classList.add("hidden");
+        deleteModal.classList.remove("flex");
+        formToSubmit = null; // Xóa tham chiếu form
+      });
+
+      confirmDeleteBtn.addEventListener("click", () => {
+        if (formToSubmit) {
+          formToSubmit.submit(); // Gửi form đã lưu
+        }
+        deleteModal.classList.add("hidden");
+        deleteModal.classList.remove("flex");
+        formToSubmit = null; // Xóa tham chiếu form
+      });
+
+      // Đóng modal khi click ra ngoài
+      deleteModal.addEventListener("click", (event) => {
+        if (event.target === deleteModal) {
+          deleteModal.classList.add("hidden");
+          deleteModal.classList.remove("flex");
+          formToSubmit = null;
+        }
+      });
+    </script>
+  </body>
+</html>

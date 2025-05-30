@@ -1,4 +1,4 @@
-package librarymanagement.vn.library.controller;
+package librarymanagement.vn.library.controller.client;
 
 import java.io.IOException;
 import java.util.List;
@@ -63,13 +63,13 @@ public class LibrarianController {
         model.addAttribute("totalPages", pageLibrarians.getTotalPages());
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
-        return "librarians/show"; // trang hiển thị danh sách thủ thư
+        return "/client/librarians/show"; // trang hiển thị danh sách thủ thư
     }
 
     @GetMapping("/librarians/create")
     public String getCreateLibrarianPage(Model model) {
         model.addAttribute("librarian", new Librarian());
-        return "/librarians/create";
+        return "/client/librarians/create";
     }
 
     @PostMapping("/librarians/create")
@@ -104,7 +104,7 @@ public class LibrarianController {
             throw new RuntimeException("Không tồn tại thủ thư này");
         }
         model.addAttribute("librarian", optionalLibrarian.get());
-        return "/librarians/edit";
+        return "/client/librarians/edit";
     }
 
     @PostMapping("/librarians/edit")
@@ -153,7 +153,7 @@ public class LibrarianController {
     @GetMapping("/librarians/detail/{id}")
     public String getLibrarianDetailPage(@PathVariable("id") long id, Model model) {
         model.addAttribute("librarian", this.librarianService.fetchLibrarianById(id).get());
-        return "/librarians/detail";
+        return "/client/librarians/detail";
     }
 
 }
