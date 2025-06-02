@@ -28,7 +28,8 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
             throws IOException, ServletException { // Add ServletException to method signature
 
         String targetUrl = determineTargetUrl(authentication);
-
+        // Đây là nơi bạn có thể ghi log hoặc thực hiện các hành động khác sau khi đăng
+        // nhập thành công chẳng hạn như set Attributes cho session
         if (response.isCommitted()) {
             return;
         }
