@@ -8,6 +8,8 @@
 - Microserivce
 - Áp dụng spring security
 - Thêm membershipType vào trong create         -- Xong
+- Tính năng quên mật khẩu
+- Tính năng đăng nhập bằng Google
 
 
 

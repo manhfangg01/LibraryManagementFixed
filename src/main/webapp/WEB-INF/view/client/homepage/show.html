@@ -37,6 +37,27 @@
       .menu a:hover {
         background-color: #45a049;
       }
+
+      /* Styles for the logout button */
+      .logout-container {
+        margin-top: 30px;
+      }
+
+      .logout-button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #f44336; /* Red color for logout */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+
+      .logout-button:hover {
+        background-color: #da190b; /* Darker red on hover */
+      }
     </style>
   </head>
   <body>
@@ -49,6 +70,14 @@
       <a href="/members">👤 Thành viên</a>
       <a href="/librarians">🧑‍💼 Thủ thư</a>
       <a href="/borrows">📥 Phiếu mượn</a>
+    </div>
+
+    <div class="logout-container">
+      <form th:action="@{/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <!-- Muốn đăng xuất theo cơ chế tự động của Spring thì phải truyền cho nó CSRF token-->
+        <button type="submit" class="logout-button">Đăng xuất</button>
+      </form>
     </div>
   </body>
 </html>
